@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 校园失物招领系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="container-fluid min-vh-100 d-flex align-items-center">
+        <div class="row w-100">
+            <!-- 左侧装饰 -->
+            <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center bg-gradient-primary">
+                <div class="text-center text-white">
+                    <i class="bi bi-search-heart display-1 mb-4 animate__animated animate__float"></i>
+                    <h2 class="fw-bold mb-3 animate__animated animate__fadeInUp">校园失物招领系统</h2>
+                    <p class="lead animate__animated animate__fadeInUp animate__delay-100">
+                        帮助同学们快速找回丢失的物品<br>
+                        构建和谐校园环境
+                    </p>
+                    <div class="row mt-5">
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="bi bi-shield-check display-4 mb-2"></i>
+                                <h6>安全可靠</h6>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="bi bi-lightning display-4 mb-2"></i>
+                                <h6>高效便捷</h6>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="bi bi-heart display-4 mb-2"></i>
+                                <h6>温暖人心</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧登录表单 -->
+            <div class="col-lg-6 d-flex align-items-center justify-content-center">
+                <div class="w-100" style="max-width: 400px;">
+                    <div class="text-center mb-5 animate__animated animate__fadeInDown">
+                        <i class="bi bi-search-heart display-4 text-primary mb-3"></i>
+                        <h3 class="fw-bold">欢迎回来</h3>
+                        <p class="text-muted">请登录您的账户</p>
+                    </div>
+                    
+                    <!-- 登录表单 -->
+                    <div class="card border-0 shadow-lg animate__animated animate__fadeInUp">
+                        <div class="card-body p-4">
+                            <!-- 错误消息 -->
+                            <div th:if="${param.error}" class="alert alert-danger animate__animated animate__shakeX" role="alert">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                用户名或密码错误，请重试
+                            </div>
+                            
+                            <!-- 退出消息 -->
+                            <div th:if="${param.logout}" class="alert alert-success animate__animated animate__fadeIn" role="alert">
+                                <i class="bi bi-check-circle me-2"></i>
+                                您已成功退出登录
+                            </div>
+                            
+                            <!-- 注册成功消息 -->
+                            <div th:if="${param.registered}" class="alert alert-success animate__animated animate__fadeIn" role="alert">
+                                <i class="bi bi-check-circle me-2"></i>
+                                注册成功！请使用您的账户登录
+                            </div>
+                            
+                            <form th:action="@{/auth/login}" method="post" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">
+                                        <i class="bi bi-person me-1"></i>用户名
+                                    </label>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           placeholder="请输入用户名" required autofocus>
+                                    <div class="invalid-feedback">
+                                        请输入用户名
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="bi bi-lock me-1"></i>密码
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               placeholder="请输入密码" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="bi bi-eye" id="passwordIcon"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        请输入密码
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+                                    <label class="form-check-label" for="rememberMe">
+                                        记住我
+                                    </label>
+                                </div>
+                                
+                                <div class="d-grid mb-3">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>登录
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="text-center">
+                                <p class="text-muted mb-3">还没有账户？</p>
+                                <a th:href="@{/auth/register}" class="btn btn-outline-primary">
+                                    <i class="bi bi-person-plus me-2"></i>立即注册
+                                </a>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a th:href="@{/}" class="text-muted text-decoration-none">
+                                    <i class="bi bi-arrow-left me-1"></i>返回首页
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 快速登录提示 -->
+                    <div class="card border-0 bg-light mt-4 animate__animated animate__fadeInUp animate__delay-200">
+                        <div class="card-body p-3">
+                            <h6 class="card-title mb-2">
+                                <i class="bi bi-info-circle me-2"></i>快速体验
+                            </h6>
+                            <p class="card-text small text-muted mb-0">
+                                管理员账户：admin / admin123<br>
+                                普通用户：user / user123
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+    
+    <script>
+        // 密码显示/隐藏切换
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'bi bi-eye';
+            }
+        });
+        
+        // 表单验证
+        (function() {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+        
+        // 自动填充快速体验账户
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const demo = urlParams.get('demo');
+            
+            if (demo === 'admin') {
+                document.getElementById('username').value = 'admin';
+                document.getElementById('password').value = 'admin123';
+            } else if (demo === 'user') {
+                document.getElementById('username').value = 'user';
+                document.getElementById('password').value = 'user123';
+            }
+        });
+    </script>
+    
+    <style>
+        .login-page {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card {
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .input-group .btn {
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        
+        .input-group .form-control {
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .login-page {
+                padding: 1rem;
+            }
+            
+            .card-body {
+                padding: 2rem 1.5rem !important;
+            }
+        }
+    </style>
+</body>
+</html>

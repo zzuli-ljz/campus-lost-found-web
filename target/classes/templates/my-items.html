@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">我的失物/拾物</h2>
+        
+        <!-- 成功消息 -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            <span th:if="${param.success[0] == 'completed'}">物品已标记为完成</span>
+            <span th:if="${param.success[0] == 'deleted'}">物品删除成功</span>
+            <span th:if="${param.success[0] == 'updated'}">物品更新成功</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- 错误消息 -->
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span th:if="${param.error[0] == 'completion_failed'}">确认完成失败，请重试</span>
+            <span th:if="${param.error[0] == 'delete_failed'}">删除失败，请重试</span>
+            <span th:if="${param.error[0] == 'update_failed'}">更新失败，请重试</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="row g-3" th:if="${items}!=null">
+            <div class="col-md-4" th:each="it : ${items}">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${it.title}">标题</h5>
+                        <p class="card-text text-truncate-3" th:text="${it.description}">描述</p>
+                        <div class="small text-muted mb-2">
+                            <span th:text="${it.postType.getDescription()}">类型</span>
+                            · <span th:text="${it.category.getDescription()}">类别</span>
+                            · 审核：<span th:text="${it.approved} ? '通过' : '待审'"></span>
+                        </div>
+                        <div class="mb-2">
+                            <span th:if="${it.status.name() == 'PENDING_APPROVAL'}" class="badge bg-warning" th:text="${it.status.getDescription()}">待审核</span>
+                            <span th:if="${it.status.name() == 'PENDING_CLAIM'}" class="badge bg-info" th:text="${it.status.getDescription()}">待认领</span>
+                            <span th:if="${it.status.name() == 'CLAIMED'}" class="badge bg-success" th:text="${it.status.getDescription()}">已认领</span>
+                            <span th:if="${it.status.name() == 'UNCLAIMED'}" class="badge bg-secondary" th:text="${it.status.getDescription()}">无人认领</span>
+                            <span th:if="${it.status.name() == 'EXPIRED'}" class="badge bg-danger" th:text="${it.status.getDescription()}">已过期</span>
+                            <span th:if="${it.status.name() == 'COMPLETED'}" class="badge bg-dark" th:text="${it.status.getDescription()}">已完成</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 d-flex gap-2">
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{'/items/' + ${it.id}}">查看详情</a>
+                        <form th:action="@{'/items/' + ${it.id} + '/confirm-completion'}" method="post"
+                              th:if="${it.approved && it.status.name() != 'COMPLETED' && it.status.name() != 'PENDING_APPROVAL'}"
+                              onsubmit="return confirm('确认将此物品标记为已完成？完成后将无法继续聊天。');">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-success btn-sm">确认完成</button>
+                        </form>
+                        <form th:action="@{'/items/' + ${it.id} + '/delete'}" method="post"
+                              onsubmit="return confirm('确定删除这条记录吗？');">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-danger btn-sm">删除</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

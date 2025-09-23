@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试用户 - 校园失物招领系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>用户测试页面</h1>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <strong>错误:</strong> <span th:text="${error}"></span>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Admin用户</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${adminUser}">
+                            <p><strong>用户名:</strong> <span th:text="${adminUser.username}"></span></p>
+                            <p><strong>显示名称:</strong> <span th:text="${adminUser.displayName}"></span></p>
+                            <p><strong>角色:</strong> <span th:text="${adminUser.role}"></span></p>
+                            <p><strong>启用状态:</strong> <span th:text="${adminUser.enabled}"></span></p>
+                            <p><strong>密码:</strong> <span th:text="${adminUser.password != null ? '已设置' : '未设置'}"></span></p>
+                        </div>
+                        <div th:unless="${adminUser}">
+                            <p class="text-danger">Admin用户不存在</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>User用户</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${userUser}">
+                            <p><strong>用户名:</strong> <span th:text="${userUser.username}"></span></p>
+                            <p><strong>显示名称:</strong> <span th:text="${userUser.displayName}"></span></p>
+                            <p><strong>角色:</strong> <span th:text="${userUser.role}"></span></p>
+                            <p><strong>启用状态:</strong> <span th:text="${userUser.enabled}"></span></p>
+                            <p><strong>密码:</strong> <span th:text="${userUser.password != null ? '已设置' : '未设置'}"></span></p>
+                        </div>
+                        <div th:unless="${userUser}">
+                            <p class="text-danger">User用户不存在</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a th:href="@{/}" class="btn btn-primary">返回首页</a>
+            <a th:href="@{/auth/login}" class="btn btn-secondary">登录页面</a>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

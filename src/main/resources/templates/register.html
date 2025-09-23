@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 校园失物招领系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body class="register-page">
+    <div class="container-fluid min-vh-100 d-flex align-items-center">
+        <div class="row w-100">
+            <!-- 左侧装饰 -->
+            <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center bg-gradient-primary">
+                <div class="text-center text-white">
+                    <i class="bi bi-person-plus display-1 mb-4 animate__animated animate__float"></i>
+                    <h2 class="fw-bold mb-3 animate__animated animate__fadeInUp">加入我们</h2>
+                    <p class="lead animate__animated animate__fadeInUp animate__delay-100">
+                        创建账户，开始使用校园失物招领系统<br>
+                        帮助他人，温暖校园
+                    </p>
+                    <div class="row mt-5">
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="bi bi-shield-check display-4 mb-2"></i>
+                                <h6>信息安全</h6>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="bi bi-people display-4 mb-2"></i>
+                                <h6>社区互助</h6>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="bi bi-star display-4 mb-2"></i>
+                                <h6>优质体验</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧注册表单 -->
+            <div class="col-lg-6 d-flex align-items-center justify-content-center">
+                <div class="w-100" style="max-width: 500px;">
+                    <div class="text-center mb-5 animate__animated animate__fadeInDown">
+                        <i class="bi bi-person-plus display-4 text-primary mb-3"></i>
+                        <h3 class="fw-bold">创建账户</h3>
+                        <p class="text-muted">请填写以下信息完成注册</p>
+                    </div>
+                    
+                    <!-- 注册表单 -->
+                    <div class="card border-0 shadow-lg animate__animated animate__fadeInUp">
+                        <div class="card-body p-4">
+                            <!-- 错误消息 -->
+                            <div th:if="${error}" class="alert alert-danger animate__animated animate__shakeX" role="alert">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <span th:text="${error}"></span>
+                            </div>
+                            
+                            <!-- 成功消息 -->
+                            <div th:if="${success}" class="alert alert-success animate__animated animate__fadeIn" role="alert">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <span th:text="${success}"></span>
+                            </div>
+                            
+                            <form th:action="@{/auth/register}" method="post" class="needs-validation" novalidate>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label">
+                                            <i class="bi bi-person me-1"></i>用户名 *
+                                        </label>
+                                        <input type="text" class="form-control" id="username" name="username" 
+                                               placeholder="请输入用户名" required>
+                                        <div class="invalid-feedback">
+                                            请输入用户名
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="displayName" class="form-label">
+                                            <i class="bi bi-card-text me-1"></i>显示名称 *
+                                        </label>
+                                        <input type="text" class="form-control" id="displayName" name="displayName" 
+                                               placeholder="请输入显示名称" required>
+                                        <div class="invalid-feedback">
+                                            请输入显示名称
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="studentId" class="form-label">
+                                        <i class="bi bi-mortarboard me-1"></i>学号 *
+                                    </label>
+                                    <input type="text" class="form-control" id="studentId" name="studentId" 
+                                           placeholder="请输入学号" required>
+                                    <div class="invalid-feedback">
+                                        请输入学号
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">
+                                            <i class="bi bi-envelope me-1"></i>邮箱
+                                        </label>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               placeholder="请输入邮箱">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">
+                                            <i class="bi bi-phone me-1"></i>手机号
+                                        </label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" 
+                                               placeholder="请输入手机号">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">
+                                            <i class="bi bi-lock me-1"></i>密码 *
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="password" name="password" 
+                                                   placeholder="请输入密码" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                <i class="bi bi-eye" id="passwordIcon"></i>
+                                            </button>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            请输入密码
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirmPassword" class="form-label">
+                                            <i class="bi bi-lock-fill me-1"></i>确认密码 *
+                                        </label>
+                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                               placeholder="请再次输入密码" required>
+                                        <div class="invalid-feedback">
+                                            请确认密码
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                                    <label class="form-check-label" for="agreeTerms">
+                                        我同意 <a href="#" class="text-primary">用户协议</a> 和 <a href="#" class="text-primary">隐私政策</a>
+                                    </label>
+                                    <div class="invalid-feedback">
+                                        请同意用户协议和隐私政策
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid mb-3">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-person-plus me-2"></i>立即注册
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="text-center">
+                                <p class="text-muted mb-3">已有账户？</p>
+                                <a th:href="@{/auth/login}" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>立即登录
+                                </a>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a th:href="@{/}" class="text-muted text-decoration-none">
+                                    <i class="bi bi-arrow-left me-1"></i>返回首页
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+    
+    <script>
+        // 密码显示/隐藏切换
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'bi bi-eye';
+            }
+        });
+        
+        // 密码确认验证
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.setCustomValidity('两次输入的密码不一致');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        // 表单验证
+        (function() {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+    
+    <style>
+        .register-page {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card {
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .input-group .btn {
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        
+        .input-group .form-control {
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .register-page {
+                padding: 1rem;
+            }
+            
+            .card-body {
+                padding: 2rem 1.5rem !important;
+            }
+        }
+    </style>
+</body>
+</html>

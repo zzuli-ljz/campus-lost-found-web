@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">发布公告</h2>
+        <form th:action="@{/admin/announcements}" method="post" class="card p-3 shadow-sm">
+            <div class="mb-3">
+                <label class="form-label">标题</label>
+                <input class="form-control" name="title" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">内容</label>
+                <textarea class="form-control" rows="4" name="content" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">发布到全体用户</button>
+        </form>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

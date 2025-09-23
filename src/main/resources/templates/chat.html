@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content" style="height: calc(100vh - 76px); overflow: hidden;">
+        <!-- 错误提示 -->
+        <div th:if="${error != null}" class="alert alert-warning alert-dismissible fade show" role="alert" style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1050; width: 90%; max-width: 500px;">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span th:if="${error == 'item_not_found'}">物品不存在或已被删除</span>
+            <span th:if="${error == 'cannot_chat_with_self'}">不能与自己聊天</span>
+            <span th:if="${error == 'system_error'}">系统错误，请重试</span>
+            <span th:if="${error == 'thread_not_found'}">聊天会话不存在</span>
+            <span th:if="${error == 'item_completed'}">物品已完成，无法发送消息</span>
+            <span th:if="${error != 'item_not_found' and error != 'cannot_chat_with_self' and error != 'system_error' and error != 'thread_not_found' and error != 'item_completed'}">发生错误，请重试</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- 聊天窗口容器 - 全屏布局 -->
+        <div class="d-flex h-100" style="background: #f5f5f5;">
+            <!-- 会话列表 - 微信风格 -->
+            <div class="flex-shrink-0 d-flex flex-column" style="width: 350px; background: #f7f7f7; border-right: 1px solid #e1e5e9;">
+                <!-- 头部 -->
+                <div class="d-flex align-items-center justify-content-between p-3" style="background: #2c2c2c; color: white; flex-shrink: 0;">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="bi bi-chat-dots me-2"></i>聊天
+                    </h6>
+                    <span class="badge bg-success" th:text="${#lists.size(threads)}">0</span>
+                </div>
+                
+                <!-- 搜索框 -->
+                <div class="p-3" style="background: #f7f7f7; flex-shrink: 0;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-0" placeholder="搜索聊天记录" style="background: white;">
+                    </div>
+                </div>
+                
+                <!-- 会话列表 -->
+                <div class="flex-grow-1" style="overflow-y: auto;">
+                    <div th:if="${threads == null or #lists.isEmpty(threads)}" class="text-center text-muted py-5">
+                        <i class="bi bi-chat-dots display-4 d-block mb-3 text-muted"></i>
+                        <p class="mb-0">暂无聊天会话</p>
+                        <small>开始与物品发布者对话吧</small>
+                    </div>
+                    
+                    <a th:each="t : ${threads}" class="chat-item text-decoration-none"
+                       th:class="${openId != null and openId == t.id} ? 'active' : ''"
+                       th:href="@{/chat(open=${t.id})}"
+                       style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background-color 0.2s; position: relative; display: block; color: inherit;">
+                        
+                        <div class="d-flex align-items-center">
+                            <!-- 头像 -->
+                            <div class="me-3 position-relative">
+                                <div th:if="${t.item.images != null and !t.item.images.isEmpty()}"
+                                     class="rounded-circle overflow-hidden"
+                                     style="width: 48px; height: 48px;">
+                                    <img th:src="@{'/uploads/' + ${t.item.images[0].fileName}}"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div th:unless="${t.item.images != null and !t.item.images.isEmpty()}"
+                                     class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                     style="width: 48px; height: 48px; font-size: 18px;"
+                                     th:text="${#strings.substring(t.item.title, 0, 1)}">物</div>
+                                
+                                <!-- 未读消息红点 -->
+                                <div th:if="${t.unreadCount > 0}" 
+                                     class="position-absolute top-0 end-0 bg-danger rounded-circle text-white text-center fw-bold"
+                                     style="width: 18px; height: 18px; font-size: 10px; line-height: 18px;"
+                                     th:text="${t.unreadCount}">3</div>
+                            </div>
+                            
+                            <!-- 内容 -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="mb-0 fw-bold" th:text="${t.item.title}" style="font-size: 16px;">物品标题</h6>
+                                    <small class="text-muted" th:text="${#temporals.format(t.updatedAt, 'HH:mm')}">时间</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted" style="font-size: 14px;">
+                                        <span th:text="${t.item.postType.getDescription()}">失物</span> · 
+                                        <span th:text="${t.item.category.getDescription()}">分类</span>
+                                    </div>
+                                    <div th:if="${t.unreadCount > 0}" class="bg-danger text-white rounded-pill px-2 py-1" 
+                                         style="font-size: 12px; min-width: 20px; text-align: center;"
+                                         th:text="${t.unreadCount}">3</div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 聊天区域 - 微信风格 -->
+            <div class="flex-grow-1 d-flex flex-column" th:with="openId=${openId}" style="background: #f5f5f5;">
+                <!-- 聊天头部 -->
+                <div th:if="${openId != null}" class="d-flex align-items-center p-3" 
+                     style="background: #2c2c2c; color: white; border-bottom: 1px solid #e1e5e9; flex-shrink: 0;">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div th:if="${currentItem != null and currentItem.images != null and !currentItem.images.isEmpty()}"
+                                 class="rounded-circle overflow-hidden"
+                                 style="width: 40px; height: 40px;">
+                                <img th:src="@{'/uploads/' + ${currentItem.images[0].fileName}}"
+                                     style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div th:unless="${currentItem != null and currentItem.images != null and !currentItem.images.isEmpty()}"
+                                 class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                 style="width: 40px; height: 40px; font-size: 16px;"
+                                 th:text="${currentItem != null ? #strings.substring(currentItem.title, 0, 1) : '物'}">物</div>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold" th:text="${currentItem != null ? currentItem.title : '物品标题'}">物品标题</h6>
+                            <small class="text-white-50" th:text="${currentItem != null ? currentItem.postType.getDescription() : '失物'}">失物</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 空状态 -->
+                <div th:if="${openId == null}" class="d-flex align-items-center justify-content-center flex-grow-1">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-chat-dots display-1 d-block mb-3" style="color: #ccc;"></i>
+                        <h5>选择会话开始聊天</h5>
+                        <p>从左侧选择一个会话开始与物品发布者对话</p>
+                    </div>
+                </div>
+                
+                <!-- 聊天消息区域 -->
+                <div th:if="${openId != null}" class="flex-grow-1 d-flex flex-column" style="background: #f5f5f5;">
+                    <!-- 消息列表 -->
+                    <div class="flex-grow-1" id="chatMessages" style="overflow-y: auto; padding: 20px;">
+                        <!-- 空消息状态 -->
+                        <div th:if="${messages == null or #lists.isEmpty(messages)}" class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-chat-dots display-1 d-block mb-3" style="color: #ccc;"></i>
+                                <h5>开始你们的对话吧！</h5>
+                                <p>输入消息开始与对方交流</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 消息列表 -->
+                        <div th:if="${messages != null and !#lists.isEmpty(messages)}">
+                            <div th:each="m : ${messages}" class="message-wrapper mb-3" th:id="${'m' + m.id}">
+                                <div th:class="${m.sender.id == user.id} ? 'message-sent' : 'message-received'">
+                                    <!-- 头像 -->
+                                    <div class="message-avatar">
+                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                                             style="width: 36px; height: 36px; font-size: 14px;"
+                                             th:text="${#strings.substring(m.sender.displayName, 0, 1)}">A</div>
+                                    </div>
+                                    
+                                    <!-- 消息内容 -->
+                                    <div class="message-content">
+                                        <div th:class="${m.sender.id == user.id} ? 'message-bubble-sent' : 'message-bubble-received'">
+                                            <div class="message-text" th:text="${m.content}">消息内容</div>
+                                            <div class="message-time" th:text="${#temporals.format(m.createdAt, 'HH:mm')}">时间</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 输入区域 -->
+                    <div class="chat-input" style="background: white; border-top: 1px solid #e1e5e9; padding: 15px; flex-shrink: 0;">
+                        <!-- 检查物品是否已完成 -->
+                        <div th:if="${currentItem != null && currentItem.status.name() == 'COMPLETED'}" class="text-center text-muted py-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span>此物品已完成，无法继续聊天</span>
+                        </div>
+                        <form th:if="${currentItem == null || currentItem.status.name() != 'COMPLETED'}" 
+                              th:action="@{'/chat/' + ${openId} + '/send'}" method="post" class="d-flex align-items-end gap-2">
+                            <div class="flex-grow-1">
+                                <textarea class="form-control border-0" name="content" 
+                                          placeholder="输入消息..." required 
+                                          style="resize: none; background: #f8f9fa; border-radius: 20px; padding: 10px 15px; min-height: 40px; max-height: 120px;"
+                                          rows="1" oninput="autoResize(this)"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary rounded-circle" style="width: 40px; height: 40px;">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+
+<style>
+/* 微信风格聊天样式 */
+.chat-item {
+    transition: background-color 0.2s ease;
+}
+
+.chat-item:hover {
+    background-color: #e8e8e8 !important;
+}
+
+.chat-item.active {
+    background-color: #d4edda !important;
+    border-left: 3px solid #28a745;
+}
+
+/* 消息样式 */
+.message-wrapper {
+    margin-bottom: 15px;
+}
+
+.message-sent {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.message-received {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.message-avatar {
+    margin: 0 8px;
+    flex-shrink: 0;
+}
+
+.message-content {
+    max-width: 60%;
+    position: relative;
+}
+
+.message-bubble-sent {
+    background: #95ec69;
+    color: #000;
+    border-radius: 18px 18px 4px 18px;
+    padding: 10px 15px;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message-bubble-received {
+    background: white;
+    color: #000;
+    border-radius: 18px 18px 18px 4px;
+    padding: 10px 15px;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    border: 1px solid #e1e5e9;
+}
+
+.message-text {
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #999;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.message-bubble-received .message-time {
+    text-align: left;
+}
+
+/* 聊天输入框样式 */
+.chat-input textarea {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.chat-input textarea:focus {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* 滚动条样式 */
+#chatMessages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatMessages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 动画效果 */
+.message-wrapper {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 未读消息红点动画 */
+.bg-danger {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+</style>
+
+<script>
+// 自动调整输入框高度
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+// 自动滚动到底部
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // 如果有打开的聊天，自动标记为已读
+        const openId = /*[[${openId}]]*/ null;
+        if (openId) {
+            markAsRead(openId);
+        }
+    }
+});
+
+// 消息发送后自动滚动
+document.querySelector('form[method="post"]')?.addEventListener('submit', function() {
+    setTimeout(() => {
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }, 100);
+});
+
+// 标记聊天为已读
+function markAsRead(threadId) {
+    fetch('/chat/' + threadId + '/mark-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    }).then(response => {
+        if (response.ok) {
+            // 更新未读消息数量（移除当前线程的未读消息）
+            updateUnreadCount();
+        }
+    }).catch(error => {
+        console.error('标记已读失败:', error);
+    });
+}
+
+// 更新未读消息数量显示
+function updateUnreadCount() {
+    // 这里可以添加更新未读消息数量的逻辑
+    // 由于页面会刷新，暂时不需要手动更新
+}
+
+// 回车发送消息
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.querySelector('textarea[name="content"]');
+    if (textarea) {
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const form = this.closest('form');
+                if (form) {
+                    form.submit();
+                }
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

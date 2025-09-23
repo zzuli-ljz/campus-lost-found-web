@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">通知</h2>
+            <div class="d-flex gap-2">
+                <form th:action="@{/notifications/mark-all-read}" method="post">
+                    <button class="btn btn-outline-primary btn-sm" type="submit">一键已读</button>
+                </form>
+                <form th:action="@{/notifications/delete-all}" method="post" onsubmit="return confirm('确定删除所有通知吗？');">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">删除全部</button>
+                </form>
+            </div>
+        </div>
+        <div class="list-group" th:if="${notifications}!=null">
+            <div class="list-group-item d-flex justify-content-between align-items-start" th:each="n : ${notifications}"
+                 th:classappend="${n.isRead} ? ' text-muted bg-light' : ''" style="border-left: 4px solid;" th:styleappend="${n.isRead} ? 'border-color:#ccc' : 'border-color:#0d6efd'">
+                <div class="me-3 flex-grow-1">
+                    <a th:href="${n.relatedItem} != null ? @{('/items/' + ${n.relatedItem.id})} : @{'/notifications/mark-read?id=' + ${n.id}}" class="text-decoration-none">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1" th:text="${n.title}">标题</h5>
+                            <small th:text="${#temporals.format(n.createdAt, 'yyyy-MM-dd HH:mm')}">时间</small>
+                        </div>
+                        <p class="mb-1" th:text="${n.content}">内容</p>
+                        <small th:text="${n.type}">类型</small>
+                    </a>
+                </div>
+                <form th:action="@{'/notifications/' + ${n.id} + '/delete'}" method="post"
+                      onsubmit="return confirm('确定删除这条通知吗？');">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,83 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /campus-lost-found
+
+spring:
+  application:
+    name: campus-lost-found-system
+  
+  # 数据库配置 - 使用文件数据库
+  datasource:
+    url: jdbc:h2:file:./data/lostfounddb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+  # JPA配置
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+  # SQL初始化配置
+  sql:
+    init:
+      mode: never
+      continue-on-error: true
+        
+  # H2控制台配置
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      
+  # Thymeleaf配置
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML
+    servlet:
+      content-type: text/html
+      
+  # 静态资源配置
+  web:
+    resources:
+      static-locations: classpath:/static/
+      
+  # 安全配置（使用自定义UserDetailsService）
+      
+# 日志配置
+logging:
+  level:
+    com.campus: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    
+# 自定义配置
+app:
+  upload:
+    path: uploads/
+    max-size: 10485760  # 10MB
+    
+  notification:
+    enabled: true
+    
+  matching:
+    similarity-threshold: 0.7
+    
+  admin:
+    auto-approve: false

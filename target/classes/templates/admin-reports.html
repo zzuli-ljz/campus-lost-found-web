@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">举报处理</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>物品</th>
+                <th>举报人</th>
+                <th>原因</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${reports}">
+                <td th:text="${r.item.title}">物品</td>
+                <td th:text="${r.reporter.username}">举报人</td>
+                <td th:text="${r.reason}">原因</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <form th:action="@{'/admin/reports/' + ${r.id} + '/reject'}" method="post" class="d-flex gap-2">
+                            <input class="form-control form-control-sm" name="reason" placeholder="驳回原因" />
+                            <button class="btn btn-outline-secondary btn-sm" type="submit">驳回举报</button>
+                        </form>
+                        <form th:action="@{'/admin/reports/' + ${r.id} + '/accept-delete'}" method="post" class="d-flex gap-2">
+                            <input class="form-control form-control-sm" name="reason" placeholder="删除原因(可选)" />
+                            <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('确定删除该信息并通知相关用户？');">删除信息</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${reports == null or #lists.isEmpty(reports)}">
+                <td colspan="4" class="text-center text-muted">暂无待处理举报</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

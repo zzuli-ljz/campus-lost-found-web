@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 校园失物招领系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-lg">
+        <div class="container">
+            <a class="navbar-brand fw-bold animate__animated animate__fadeInLeft" th:href="@{/}">
+                <i class="bi bi-search-heart me-2"></i>
+                校园失物招领
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/}">
+                            <i class="bi bi-house-door me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/search}">
+                            <i class="bi bi-search me-1"></i>搜索
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/items/post}">
+                            <i class="bi bi-plus-circle me-1"></i>发布
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/items/my-items}">
+                            <i class="bi bi-collection me-1"></i>我的物品
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/items/completed}">
+                            <i class="bi bi-clipboard-check me-1"></i>已完成
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/matches/history}">
+                            <i class="bi bi-heart me-1"></i>匹配历史
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link position-relative" th:href="@{/notifications}">
+                            <i class="bi bi-bell me-1"></i>通知
+                            <span th:if="${unreadCount != null && unreadCount > 0}" 
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger animate__animated animate__pulse">
+                                <span th:text="${unreadCount}">0</span>
+                                <span class="visually-hidden">未读通知</span>
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <span sec:authentication="name">用户</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" th:href="@{/profile}">
+                                <i class="bi bi-person me-2"></i>个人资料
+                            </a></li>
+                            <li><a class="dropdown-item" th:href="@{/chat}">
+                                <i class="bi bi-chat-dots me-2"></i>聊天
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/logout}">
+                                <i class="bi bi-box-arrow-right me-2"></i>退出登录
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a class="nav-link" th:href="@{/auth/login}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>登录
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 英雄区域 -->
+        <section class="hero-section py-5 mb-5">
+            <div class="container">
+                <div class="row align-items-center min-vh-50">
+                    <div class="col-lg-6 animate__animated animate__fadeInLeft">
+                        <h1 class="display-4 fw-bold text-gradient mb-4">
+                            校园失物招领系统
+                        </h1>
+                        <p class="lead mb-4">
+                            帮助同学们快速找回丢失的物品，构建和谐校园环境。通过智能匹配算法，让失物招领变得更加高效便捷。
+                        </p>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <a th:href="@{/search}" class="btn btn-primary btn-lg animate__animated animate__pulse">
+                                <i class="bi bi-search me-2"></i>开始搜索
+                            </a>
+                            <a th:href="@{/items/post}" class="btn btn-outline-primary btn-lg" sec:authorize="isAuthenticated()">
+                                <i class="bi bi-plus-circle me-2"></i>发布信息
+                            </a>
+                            <a th:href="@{/auth/login}" class="btn btn-outline-primary btn-lg" sec:authorize="!isAuthenticated()">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>立即登录
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 animate__animated animate__fadeInRight">
+                        <div class="hero-image text-center">
+                            <i class="bi bi-search-heart display-1 text-primary animate__animated animate__float"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 统计信息 -->
+        <section class="stats-section py-5 mb-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-collection display-4 text-primary"></i>
+                                </div>
+                                <h3 class="fw-bold text-gradient" th:text="${totalItems}">0</h3>
+                                <p class="text-muted mb-0">总物品数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp animate__delay-100">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-search display-4 text-warning"></i>
+                                </div>
+                                <h3 class="fw-bold text-gradient" th:text="${lostItems}">0</h3>
+                                <p class="text-muted mb-0">失物数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp animate__delay-200">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-hand-thumbs-up display-4 text-success"></i>
+                                </div>
+                                <h3 class="fw-bold text-gradient" th:text="${foundItems}">0</h3>
+                                <p class="text-muted mb-0">拾获数量</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp animate__delay-300">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-check-circle display-4 text-success"></i>
+                                </div>
+                                <h3 class="fw-bold text-gradient" th:text="${completedItems}">0</h3>
+                                <p class="text-muted mb-0">已解决问题</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 快速搜索 -->
+        <section class="search-section py-5 mb-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-lg animate__animated animate__fadeInUp">
+                            <div class="card-header bg-gradient-primary text-white text-center">
+                                <h4 class="mb-0">
+                                    <i class="bi bi-search me-2"></i>快速搜索
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/search}" method="get" class="row g-3">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" name="keyword" 
+                                               placeholder="输入物品名称或描述..." 
+                                               data-bs-toggle="tooltip" 
+                                               title="输入关键词进行搜索">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" name="postType">
+                                            <option value="">所有类型</option>
+                                            <option value="LOST">失物</option>
+                                            <option value="FOUND">拾获</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-search me-2"></i>搜索
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 最新发布 -->
+        <section class="recent-items-section py-5 mb-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bold mb-4 animate__animated animate__fadeInLeft">
+                            <i class="bi bi-clock-history me-2"></i>最新发布
+                        </h2>
+                        <div class="row g-4" th:if="${recentItems != null and !recentItems.empty}">
+                            <div class="col-md-6" th:each="item : ${recentItems.content}">
+                                <div class="card h-100 border-0 shadow-sm animate__animated animate__fadeInUp">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge badge-primary" 
+                                                  th:text="${item.postType.description}">失物</span>
+                                            <small class="text-muted" 
+                                                   th:text="${#temporals.format(item.createdAt, 'MM-dd HH:mm')}">12-01 10:30</small>
+                                        </div>
+                                        <h5 class="card-title" th:text="${item.title}">物品标题</h5>
+                                        <p class="card-text text-muted" 
+                                           th:text="${#strings.abbreviate(item.description, 80)}">物品描述...</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="bi bi-geo-alt me-1"></i>
+                                                <span th:text="${item.location}">地点</span>
+                                            </small>
+                                            <a th:href="@{/items/{id}(id=${item.id})}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                查看详情
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center" th:if="${recentItems == null or recentItems.empty}">
+                            <div class="py-5">
+                                <i class="bi bi-inbox display-1 text-muted"></i>
+                                <h5 class="text-muted mt-3">暂无最新发布</h5>
+                                <p class="text-muted">成为第一个发布信息的用户吧！</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 热门物品 -->
+                    <div class="col-lg-4">
+                        <h2 class="fw-bold mb-4 animate__animated animate__fadeInRight">
+                            <i class="bi bi-fire me-2"></i>热门物品
+                        </h2>
+                        <div class="list-group list-group-flush" th:if="${popularItems != null and !popularItems.empty}">
+                            <div class="list-group-item border-0 px-0" th:each="item : ${popularItems.content}">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-1" th:text="${item.title}">物品标题</h6>
+                                        <small class="text-muted" th:text="${item.location}">地点</small>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <a th:href="@{/items/{id}(id=${item.id})}" 
+                                           class="btn btn-sm btn-outline-primary">查看</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center" th:if="${popularItems == null or popularItems.empty}">
+                            <div class="py-4">
+                                <i class="bi bi-star display-4 text-muted"></i>
+                                <p class="text-muted mt-2">暂无热门物品</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 功能特色 -->
+        <section class="features-section py-5 mb-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 text-center mb-5">
+                        <h2 class="fw-bold animate__animated animate__fadeInUp">
+                            <i class="bi bi-lightning me-2"></i>功能特色
+                        </h2>
+                        <p class="lead text-muted animate__animated animate__fadeInUp animate__delay-100">
+                            强大的功能让失物招领变得更加简单高效
+                        </p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-cpu display-4 text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold">智能匹配</h5>
+                                <p class="text-muted">基于AI算法的智能匹配系统，自动识别相似物品，提高找回效率。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp animate__delay-100">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-shield-check display-4 text-success"></i>
+                                </div>
+                                <h5 class="fw-bold">安全可靠</h5>
+                                <p class="text-muted">严格的审核机制和用户验证，确保信息真实可靠，保护用户隐私。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center h-100 border-0 shadow-lg animate__animated animate__fadeInUp animate__delay-200">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <i class="bi bi-chat-dots display-4 text-info"></i>
+                                </div>
+                                <h5 class="fw-bold">实时沟通</h5>
+                                <p class="text-muted">内置聊天系统，支持失主和拾获者实时沟通，快速确认物品信息。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">
+                        <i class="bi bi-search-heart me-2"></i>校园失物招领系统
+                    </h5>
+                    <p class="text-muted">帮助同学们快速找回丢失的物品，构建和谐校园环境。</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">快速链接</h6>
+                    <ul class="list-unstyled">
+                        <li><a th:href="@{/}" class="text-muted text-decoration-none">首页</a></li>
+                        <li><a th:href="@{/search}" class="text-muted text-decoration-none">搜索</a></li>
+                        <li><a th:href="@{/about}" class="text-muted text-decoration-none">关于我们</a></li>
+                        <li><a th:href="@{/help}" class="text-muted text-decoration-none">帮助</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">联系我们</h6>
+                    <p class="text-muted mb-1">
+                        <i class="bi bi-envelope me-2"></i>contact@campus.edu
+                    </p>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-telephone me-2"></i>400-123-4567
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted">&copy; 2024 校园失物招领系统. 保留所有权利.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">基于 Spring Boot + Thymeleaf 构建</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="backToTop" class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle shadow-lg" 
+            style="display: none; z-index: 1000; width: 50px; height: 50px;">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- 加载动画 -->
+    <div id="loadingSpinner" class="loading-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载中...</span>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

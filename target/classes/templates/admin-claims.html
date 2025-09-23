@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">认领审核</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>物品</th>
+                <th>申请人</th>
+                <th>验证细节</th>
+                <th>发布者确认</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${claims}">
+                <td>
+                    <a th:href="@{'/items/' + ${c.item.id}}" th:text="${c.item.title}" class="text-decoration-none"></a>
+                </td>
+                <td th:text="${c.claimant.username}">用户</td>
+                <td th:text="${c.verificationDetail}">细节</td>
+                <td>
+                    <span th:if="${c.ownerConfirmed == null}" class="text-muted">未处理</span>
+                    <span th:if="${c.ownerConfirmed == true}" class="text-success">同意</span>
+                    <span th:if="${c.ownerConfirmed == false}" class="text-danger">驳回</span>
+                    <div th:if="${c.ownerConfirmNote}" class="small text-muted" th:text="${c.ownerConfirmNote}"></div>
+                </td>
+                <td class="d-flex gap-2">
+                    <a class="btn btn-success btn-sm" th:href="@{'/admin/claims/' + ${c.id} + '/approve'}">通过</a>
+                    <a class="btn btn-danger btn-sm" th:href="@{'/admin/claims/' + ${c.id} + '/reject'}">拒绝</a>
+                </td>
+            </tr>
+            <tr th:if="${claims == null or #lists.isEmpty(claims)}">
+                <td colspan="4" class="text-center text-muted">暂无待审核认领</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

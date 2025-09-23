@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">物品管理</h2>
+            <div class="btn-group">
+                <a class="btn btn-success" th:href="@{/admin}"><i class="bi bi-check2-circle me-1"></i>审核</a>
+                <a class="btn btn-warning" th:href="@{/admin/claims}"><i class="bi bi-clipboard-check me-1"></i>认领审核</a>
+                <a class="btn btn-info" th:href="@{/admin/items}"><i class="bi bi-list-ul me-1"></i>物品管理</a>
+                <a class="btn btn-info text-white" th:href="@{/admin/users}"><i class="bi bi-people me-1"></i>用户管理</a>
+                <a class="btn btn-warning" th:href="@{/admin/reports}"><i class="bi bi-flag me-1"></i>举报处理</a>
+                <a class="btn btn-primary" th:href="@{/admin/announcements}"><i class="bi bi-megaphone me-1"></i>发布公告</a>
+                <a class="btn btn-danger" th:href="@{/admin/admins}"><i class="bi bi-shield-lock me-1"></i>管理员管理</a>
+            </div>
+        </div>
+        
+        <!-- 搜索筛选区域 -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>搜索筛选</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" th:action="@{/admin/items}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">类型</label>
+                            <select name="type" class="form-select">
+                                <option value="ALL" th:selected="${selectedType == 'ALL'}">全部</option>
+                                <option value="LOST" th:selected="${selectedType == 'LOST'}">失物</option>
+                                <option value="FOUND" th:selected="${selectedType == 'FOUND'}">拾物</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">分类</label>
+                            <select name="category" class="form-select">
+                                <option value="ALL" th:selected="${selectedCategory == 'ALL'}">全部分类</option>
+                                <option th:each="cat : ${T(com.campus.lostfound.entity.Item$ItemCategory).values()}" 
+                                        th:value="${cat.name()}" 
+                                        th:text="${cat.getDescription()}"
+                                        th:selected="${selectedCategory == cat.name()}">分类</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">关键词搜索</label>
+                            <input type="text" name="keyword" class="form-control" 
+                                   th:value="${keyword}" 
+                                   placeholder="搜索标题、描述、位置...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-1"></i>搜索
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4 th:text="${#lists.size(items)}">0</h4>
+                        <small>总物品数</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h4 th:text="${#lists.size(items.?[postType.name() == 'LOST'])}">0</h4>
+                        <small>失物数量</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h4 th:text="${#lists.size(items.?[postType.name() == 'FOUND'])}">0</h4>
+                        <small>拾物数量</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h4 th:text="${#lists.size(items.?[status.name() == 'PENDING_CLAIM'])}">0</h4>
+                        <small>待认领</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>物品列表</span>
+                <div>
+                    <span class="badge bg-primary me-2" th:text="${#lists.size(items)}">0</span>
+                    <small class="text-muted" th:if="${!keyword.isEmpty()}">
+                        搜索: "<span th:text="${keyword}"></span>"
+                    </small>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>物品信息</th>
+                            <th>发布者</th>
+                            <th>类型</th>
+                            <th>状态</th>
+                            <th>发布时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- 失物分组 -->
+                        <tr th:if="${#lists.size(items.?[postType.name() == 'LOST']) > 0}">
+                            <td colspan="6" class="table-warning fw-bold">
+                                <i class="bi bi-exclamation-triangle me-2"></i>失物信息
+                                <span class="badge bg-danger ms-2" th:text="${#lists.size(items.?[postType.name() == 'LOST'])}">0</span>
+                            </td>
+                        </tr>
+                        <tr th:each="item : ${items}" th:if="${item.postType.name() == 'LOST'}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <div th:if="${item.images != null and !item.images.isEmpty()}" 
+                                             class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <img th:src="@{'/uploads/' + ${item.images[0].fileName}}" 
+                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                        </div>
+                                        <div th:unless="${item.images != null and !item.images.isEmpty()}" 
+                                             class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1" th:text="${item.title}">物品标题</h6>
+                                        <small class="text-muted" th:text="${item.category.getDescription()}">分类</small>
+                                        <br>
+                                        <small class="text-muted" th:text="${item.location.getDescription()} + ' - ' + ${item.detailedLocation.getDescription()}">位置</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div th:text="${item.owner.displayName}">发布者</div>
+                                    <small class="text-muted" th:text="${item.owner.studentId}">学号</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger" th:text="${item.postType.getDescription()}">失物</span>
+                            </td>
+                            <td>
+                                <span th:if="${item.status.name() == 'PENDING_CLAIM'}" class="badge bg-warning" th:text="${item.status.getDescription()}">待认领</span>
+                                <span th:if="${item.status.name() == 'CLAIMED'}" class="badge bg-success" th:text="${item.status.getDescription()}">已认领</span>
+                                <span th:if="${item.status.name() != 'PENDING_CLAIM' and item.status.name() != 'CLAIMED'}" class="badge bg-secondary" th:text="${item.status.getDescription()}">其他</span>
+                            </td>
+                            <td>
+                                <small th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}">发布时间</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn-outline-primary" th:href="@{'/items/' + ${item.id}}">
+                                        <i class="bi bi-eye"></i> 查看
+                                    </a>
+                                    <form th:action="@{'/admin/items/' + ${item.id} + '/delete'}" method="post" class="d-inline">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                onclick="return confirm('确定要删除这个物品吗？')">
+                                            <i class="bi bi-trash"></i> 删除
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- 拾物分组 -->
+                        <tr th:if="${#lists.size(items.?[postType.name() == 'FOUND']) > 0}">
+                            <td colspan="6" class="table-success fw-bold">
+                                <i class="bi bi-check-circle me-2"></i>拾物信息
+                                <span class="badge bg-success ms-2" th:text="${#lists.size(items.?[postType.name() == 'FOUND'])}">0</span>
+                            </td>
+                        </tr>
+                        <tr th:each="item : ${items}" th:if="${item.postType.name() == 'FOUND'}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <div th:if="${item.images != null and !item.images.isEmpty()}" 
+                                             class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <img th:src="@{'/uploads/' + ${item.images[0].fileName}}" 
+                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                        </div>
+                                        <div th:unless="${item.images != null and !item.images.isEmpty()}" 
+                                             class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1" th:text="${item.title}">物品标题</h6>
+                                        <small class="text-muted" th:text="${item.category.getDescription()}">分类</small>
+                                        <br>
+                                        <small class="text-muted" th:text="${item.location.getDescription()} + ' - ' + ${item.detailedLocation.getDescription()}">位置</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div th:text="${item.owner.displayName}">发布者</div>
+                                    <small class="text-muted" th:text="${item.owner.studentId}">学号</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success" th:text="${item.postType.getDescription()}">拾物</span>
+                            </td>
+                            <td>
+                                <span th:if="${item.status.name() == 'PENDING_CLAIM'}" class="badge bg-warning" th:text="${item.status.getDescription()}">待认领</span>
+                                <span th:if="${item.status.name() == 'CLAIMED'}" class="badge bg-success" th:text="${item.status.getDescription()}">已认领</span>
+                                <span th:if="${item.status.name() != 'PENDING_CLAIM' and item.status.name() != 'CLAIMED'}" class="badge bg-secondary" th:text="${item.status.getDescription()}">其他</span>
+                            </td>
+                            <td>
+                                <small th:text="${#temporals.format(item.createdAt, 'yyyy-MM-dd HH:mm')}">发布时间</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn-outline-primary" th:href="@{'/items/' + ${item.id}}">
+                                        <i class="bi bi-eye"></i> 查看
+                                    </a>
+                                    <form th:action="@{'/admin/items/' + ${item.id} + '/delete'}" method="post" class="d-inline">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                onclick="return confirm('确定要删除这个物品吗？')">
+                                            <i class="bi bi-trash"></i> 删除
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr th:if="${items == null or #lists.isEmpty(items)}">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                暂无已发布的物品
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>

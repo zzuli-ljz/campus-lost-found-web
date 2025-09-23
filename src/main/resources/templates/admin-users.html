@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">用户管理</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>用户名</th>
+                <th>显示名</th>
+                <th>学号</th>
+                <th>角色</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.username}">username</td>
+                <td th:text="${u.displayName}">name</td>
+                <td th:text="${u.studentId}">sid</td>
+                <td th:text="${u.role}">role</td>
+                <td th:text="${u.enabled} ? '启用' : '禁用'">status</td>
+                <td class="d-flex gap-2">
+                    <form th:action="@{'/admin/users/' + ${u.id} + '/toggle'}" method="post">
+                        <button class="btn btn-sm" th:classappend="${u.enabled} ? 'btn-warning' : 'btn-success'" th:text="${u.enabled} ? '禁用' : '启用'"></button>
+                    </form>
+                    <form th:action="@{'/admin/users/' + ${u.id} + '/reset-password'}" method="post">
+                        <input type="hidden" name="newPassword" value="user123" />
+                        <button class="btn btn-sm btn-primary" type="submit">重置密码</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">管理员管理</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">管理员</div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead><tr><th>用户名</th><th>操作</th></tr></thead>
+                            <tbody>
+                            <tr th:each="a : ${admins}">
+                                <td th:text="${a.username}">admin</td>
+                                <td>
+                                    <form th:action="@{'/admin/admins/' + ${a.id} + '/demote'}" method="post">
+                                        <button class="btn btn-sm btn-warning" type="submit" th:disabled="${a.username=='admin'}">降为用户</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">普通用户</div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead><tr><th>用户名</th><th>操作</th></tr></thead>
+                            <tbody>
+                            <tr th:each="u : ${users}">
+                                <td th:text="${u.username}">user</td>
+                                <td>
+                                    <form th:action="@{'/admin/admins/' + ${u.id} + '/promote'}" method="post">
+                                        <button class="btn btn-sm btn-primary" type="submit">升为管理员</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

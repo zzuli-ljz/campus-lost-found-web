@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">申请认领</h2>
+        <form th:action="@{/claims/apply}" method="post" class="card shadow-sm p-3">
+            <input type="hidden" name="itemId" th:value="${itemId}">
+            <div class="mb-3">
+                <label class="form-label">验证细节（例如证件号后四位/独特标记）</label>
+                <textarea class="form-control" name="verificationDetail" rows="4" required></textarea>
+            </div>
+            <div class="text-danger mb-2" th:text="${error}"></div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">提交认领</button>
+                <a class="btn btn-secondary" th:href="@{/}">返回首页</a>
+            </div>
+        </form>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

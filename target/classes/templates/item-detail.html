@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4" th:if="${item}!=null">
+        <h2 class="mb-3" th:text="${item.title}">物品标题</h2>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <style>
+            .progress-steps {position: relative; padding: 20px 10px;}
+            .progress-steps .line {position: absolute; top: 34px; left: 10px; right: 10px; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;}
+            .progress-steps .line .fill {height: 100%; background: linear-gradient(90deg,#0d6efd,#6ec1ff); width: 0; transition: width .4s ease;}
+            .progress-steps .steps {display: flex; justify-content: space-between; position: relative;}
+            .progress-steps .step {text-align: center; width: 25%;}
+            .progress-steps .dot {width: 24px; height: 24px; border-radius: 50%; background: #e9ecef; margin: 0 auto; position: relative; box-shadow: inset 0 0 0 6px #e9ecef;}
+            .progress-steps .dot.active {background: #0d6efd; box-shadow: inset 0 0 0 6px #6ec1ff;}
+            .progress-steps .label {margin-top: 8px; font-size: 12px; color: #6c757d;}
+            .progress-steps .label.active {color: #0d6efd; font-weight: 600;}
+        </style>
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <span class="badge bg-secondary me-2" th:text="${item.postType}">类型</span>
+                    <span class="badge bg-info" th:text="${item.category}">类别</span>
+                </div>
+                <p th:text="${item.description}">描述</p>
+                <ul class="list-unstyled text-muted">
+                    <li>地点：<span th:text="${item.location}">地点</span></li>
+                    <li>详细地点：<span th:text="${item.detailedLocation}">详细地点</span></li>
+                    <li>时间：<span th:text="${#temporals.format(item.lostFoundTime, 'yyyy-MM-dd HH:mm')}">时间</span></li>
+                </ul>
+                <div class="mt-3 d-flex gap-2" sec:authorize="!hasRole('ADMIN')">
+                    <!-- 失物者在拾物信息页可认领；拾物者本人不显示认领/联系自己按钮 -->
+                    <a class="btn btn-outline-primary" th:href="@{'/chat/' + ${item.id}}"
+                       th:if="${user != null and user.id != item.owner.id}">联系发布者</a>
+                    <a class="btn btn-success" th:href="@{'/claims/apply?itemId=' + ${item.id}}"
+                       th:if="${item.postType.name() == 'FOUND' and (user == null or user.id != item.owner.id)}">我要认领</a>
+                    <a class="btn btn-warning" th:href="@{'/items/report?itemId=' + ${item.id}}">举报</a>
+                </div>
+                <!-- 发布者查看/确认认领 -->
+                <div class="mt-4" sec:authorize="isAuthenticated()">
+                    <div th:if="${user != null and item.owner.id == user.id}">
+                        <h5 class="mb-3">认领申请</h5>
+                        <div>
+                            <div th:if="${claims == null || #lists.isEmpty(claims)}" class="text-muted">暂无认领申请</div>
+                            <div class="card mb-3" th:each="c : ${claims}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="fw-bold">申请人：<span th:text="${c.claimant.username}">user</span></div>
+                                            <div class="small text-muted" th:text="${#temporals.format(c.createdAt,'yyyy-MM-dd HH:mm')}">时间</div>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-secondary" th:text="${c.status}">SUBMITTED</span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2" th:text="${c.verificationDetail}">验证细节</p>
+                                    <div class="d-flex gap-2" th:if="${c.status.name() == 'SUBMITTED' and c.ownerConfirmed == null}">
+                                        <form th:action="@{'/claims/' + ${c.id} + '/owner-confirm'}" method="post" class="d-flex gap-2">
+                                            <input type="hidden" name="agree" value="true" />
+                                            <input class="form-control form-control-sm" name="note" placeholder="可选备注" />
+                                            <button class="btn btn-sm btn-success" type="submit">同意</button>
+                                        </form>
+                                        <form th:action="@{'/claims/' + ${c.id} + '/owner-confirm'}" method="post" class="d-flex gap-2">
+                                            <input type="hidden" name="agree" value="false" />
+                                            <input class="form-control form-control-sm" name="note" placeholder="可选备注" />
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">驳回</button>
+                                        </form>
+                                    </div>
+                                    <div class="text-muted" th:if="${c.ownerConfirmed != null}">
+                                        发布者已处理：<span th:text="${c.ownerConfirmed? '同意' : '驳回'}">结果</span>
+                                        <span th:if="${c.ownerConfirmNote}" class="ms-2">备注：<span th:text="${c.ownerConfirmNote}"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label class="form-label">发布流程</label>
+                    <div class="progress-steps" th:with="step=${item.approved} ? 4 : 2">
+                        <div class="line"><div class="fill" th:style="'width:' + (${step} - 1) * 33 + '%' "></div></div>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="dot active"></div>
+                                <div class="label active">已创建</div>
+                            </div>
+                            <div class="step">
+                                <div class="dot" th:classappend="${step}>=2? ' active' : ''"></div>
+                                <div class="label" th:classappend="${step}>=2? ' active' : ''">审核中</div>
+                            </div>
+                            <div class="step">
+                                <div class="dot" th:classappend="${step}>=3? ' active' : ''"></div>
+                                <div class="label" th:classappend="${step}>=3? ' active' : ''">审核通过</div>
+                            </div>
+                            <div class="step">
+                                <div class="dot" th:classappend="${step}>=4? ' active' : ''"></div>
+                                <div class="label" th:classappend="${step}>=4? ' active' : ''">已发布</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">认领流程</label>
+                    <div class="progress-steps" th:with="s=${item.status.name()}">
+                        <div class="line"><div class="fill" th:with="idx=${s=='PENDING_APPROVAL'?0:(s=='PENDING_CLAIM'?1:(s=='CLAIMED'?3:2))}" th:style="'width:' + ${idx} * 33 + '%' "></div></div>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="dot active"></div>
+                                <div class="label active">待审核</div>
+                            </div>
+                            <div class="step">
+                                <div class="dot" th:classappend="${s!='PENDING_APPROVAL'}? ' active' : ''"></div>
+                                <div class="label" th:classappend="${s!='PENDING_APPROVAL'}? ' active' : ''">可认领</div>
+                            </div>
+                            <div class="step">
+                                <div class="dot" th:classappend="${s=='UNCLAIMED' || s=='EXPIRED' || s=='CLAIMED'}? ' active' : ''"></div>
+                                <div class="label" th:classappend="${s=='UNCLAIMED' || s=='EXPIRED' || s=='CLAIMED'}? ' active' : ''">处理</div>
+                            </div>
+                            <div class="step">
+                                <div class="dot" th:classappend="${s=='CLAIMED'}? ' active' : ''"></div>
+                                <div class="label" th:classappend="${s=='CLAIMED'}? ' active' : ''">已认领</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="btn btn-secondary mt-3" th:href="@{/}">返回首页</a>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>
+
+

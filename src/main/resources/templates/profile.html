@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+    <div th:replace="layout/base :: navbar"></div>
+    
+    <main class="main-content">
+        <div th:fragment="content">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-person-circle"></i> 个人资料</h2>
+                    <div>
+                        <a href="/" class="btn btn-outline-primary">
+                            <i class="bi bi-house"></i> 返回首页
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 消息提示 -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                
+                <div class="row">
+                    <!-- 个人信息展示 -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-info-circle"></i> 基本信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">用户名</dt>
+                                    <dd class="col-sm-8" th:text="${user.username}">username</dd>
+                                    
+                                    <dt class="col-sm-4">显示名称</dt>
+                                    <dd class="col-sm-8" th:text="${user.displayName}">display</dd>
+                                    
+                                    <dt class="col-sm-4">学号</dt>
+                                    <dd class="col-sm-8" th:text="${user.studentId}">sid</dd>
+                                    
+                                    <dt class="col-sm-4">邮箱</dt>
+                                    <dd class="col-sm-8" th:text="${user.email}">email</dd>
+                                    
+                                    <dt class="col-sm-4">手机号</dt>
+                                    <dd class="col-sm-8" th:text="${user.phone}">phone</dd>
+                                    
+                                    <dt class="col-sm-4">角色</dt>
+                                    <dd class="col-sm-8">
+                                        <span th:if="${user.role.name() == 'ADMIN'}" class="badge bg-danger">管理员</span>
+                                        <span th:if="${user.role.name() == 'USER'}" class="badge bg-primary">普通用户</span>
+                                    </dd>
+                                    
+                                    <dt class="col-sm-4">注册时间</dt>
+                                    <dd class="col-sm-8" th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">时间</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作面板 -->
+                    <div class="col-md-6">
+                        <!-- 修改密码 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-key"></i> 修改密码</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/profile/change-password}" method="post">
+                                    <div class="mb-3">
+                                        <label for="oldPassword" class="form-label">当前密码</label>
+                                        <input type="password" class="form-control" id="oldPassword" 
+                                               name="oldPassword" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="newPassword" class="form-label">新密码</label>
+                                        <input type="password" class="form-control" id="newPassword" 
+                                               name="newPassword" required minlength="6">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">确认新密码</label>
+                                        <input type="password" class="form-control" id="confirmPassword" 
+                                               name="confirmPassword" required minlength="6">
+                                    </div>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-key"></i> 修改密码
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- 更新个人信息 -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-pencil"></i> 更新个人信息</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/profile/update}" method="post">
+                                    <div class="mb-3">
+                                        <label for="displayName" class="form-label">显示名称</label>
+                                        <input type="text" class="form-control" id="displayName" 
+                                               name="displayName" th:value="${user.displayName}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">邮箱</label>
+                                        <input type="email" class="form-control" id="email" 
+                                               name="email" th:value="${user.email}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">手机号</label>
+                                        <input type="tel" class="form-control" id="phone" 
+                                               name="phone" th:value="${user.phone}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="studentId" class="form-label">学号</label>
+                                        <input type="text" class="form-control" id="studentId" 
+                                               name="studentId" th:value="${user.studentId}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check"></i> 更新信息
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- 账户操作 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-gear"></i> 账户操作</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <form th:action="@{/profile/logout}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-danger w-100">
+                                            <i class="bi bi-box-arrow-right"></i> 注销登录
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </main>
+    
+    <div th:replace="layout/base :: footer"></div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // 密码确认验证
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = this.value;
+        
+        if (newPassword !== confirmPassword) {
+            this.setCustomValidity('密码不匹配');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // 新密码输入时重新验证确认密码
+    document.getElementById('newPassword').addEventListener('input', function() {
+        const confirmPassword = document.getElementById('confirmPassword');
+        if (confirmPassword.value) {
+            confirmPassword.dispatchEvent(new Event('input'));
+        }
+    });
+    </script>
+</body>
+</html>
+
+

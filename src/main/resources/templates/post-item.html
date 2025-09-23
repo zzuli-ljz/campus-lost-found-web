@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+    <div class="container py-4">
+        <h2 class="mb-4">发布信息</h2>
+        <form th:action="@{/items/post}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">标题</label>
+                <input type="text" class="form-control" name="title" th:value="${item.title}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">描述</label>
+                <textarea class="form-control" name="description" rows="4" th:text="${item.description}"></textarea>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">类别</label>
+                    <select class="form-select" name="category">
+                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">类型</label>
+                    <select class="form-select" name="postType">
+                        <option th:each="t : ${postTypes}" th:value="${t}" th:text="${t}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">时间</label>
+                    <input type="datetime-local" class="form-control" name="lostFoundTime" required>
+                </div>
+            </div>
+            <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                    <label class="form-label">地点</label>
+                    <select class="form-select" name="location" id="locationSelect" required>
+                        <option value="">请选择地点</option>
+                        <option th:each="location : ${locations}" 
+                                th:value="${location}" 
+                                th:text="${location.description}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">详细地点</label>
+                    <select class="form-select" name="detailedLocation" id="detailedLocationSelect" required>
+                        <option value="">请先选择地点</option>
+                        <option value="OTHER_UNKNOWN">其他-未知</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3 mt-3">
+                <label class="form-label">图片（可多选）</label>
+                <input type="file" class="form-control" name="images" multiple>
+            </div>
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">提交发布</button>
+                <a th:href="@{/}" class="btn btn-secondary">返回首页</a>
+            </div>
+        </form>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+
+<script>
+// 地点和详细地点的联动
+document.getElementById('locationSelect').addEventListener('change', function() {
+    const locationSelect = this;
+    const detailedLocationSelect = document.getElementById('detailedLocationSelect');
+    
+    // 清空详细地点选项
+    detailedLocationSelect.innerHTML = '<option value="">请选择详细地点</option>';
+    
+    if (locationSelect.value) {
+        // 根据选择的地点加载对应的详细地点
+        const detailedLocations = getDetailedLocations(locationSelect.value);
+        if (detailedLocations.length > 0) {
+            detailedLocations.forEach(function(detailedLocation) {
+                const option = document.createElement('option');
+                option.value = detailedLocation.value;
+                option.textContent = detailedLocation.description;
+                detailedLocationSelect.appendChild(option);
+            });
+        } else {
+            // 如果没有找到对应的详细地点，添加默认选项
+            const defaultOption = document.createElement('option');
+            defaultOption.value = 'OTHER_UNKNOWN';
+            defaultOption.textContent = '其他-未知';
+            detailedLocationSelect.appendChild(defaultOption);
+        }
+    }
+});
+
+// 获取详细地点数据
+function getDetailedLocations(location) {
+    const detailedLocationsMap = {
+        'TEACHING_BUILDING_A': [
+            {value: 'TEACHING_BUILDING_A_FLOOR_1', description: '教学楼A-1楼'},
+            {value: 'TEACHING_BUILDING_A_FLOOR_2', description: '教学楼A-2楼'},
+            {value: 'TEACHING_BUILDING_A_FLOOR_3', description: '教学楼A-3楼'},
+            {value: 'TEACHING_BUILDING_A_FLOOR_4', description: '教学楼A-4楼'},
+            {value: 'TEACHING_BUILDING_A_FLOOR_5', description: '教学楼A-5楼'},
+            {value: 'TEACHING_BUILDING_A_CLASSROOM_101', description: '教学楼A-101教室'},
+            {value: 'TEACHING_BUILDING_A_CLASSROOM_102', description: '教学楼A-102教室'},
+            {value: 'TEACHING_BUILDING_A_CLASSROOM_201', description: '教学楼A-201教室'},
+            {value: 'TEACHING_BUILDING_A_CLASSROOM_202', description: '教学楼A-202教室'},
+            {value: 'TEACHING_BUILDING_A_CORRIDOR', description: '教学楼A-走廊'},
+            {value: 'TEACHING_BUILDING_A_STAIRS', description: '教学楼A-楼梯'},
+            {value: 'TEACHING_BUILDING_A_TOILET', description: '教学楼A-卫生间'}
+        ],
+        'TEACHING_BUILDING_B': [
+            {value: 'TEACHING_BUILDING_B_FLOOR_1', description: '教学楼B-1楼'},
+            {value: 'TEACHING_BUILDING_B_FLOOR_2', description: '教学楼B-2楼'},
+            {value: 'TEACHING_BUILDING_B_FLOOR_3', description: '教学楼B-3楼'},
+            {value: 'TEACHING_BUILDING_B_FLOOR_4', description: '教学楼B-4楼'},
+            {value: 'TEACHING_BUILDING_B_CLASSROOM_101', description: '教学楼B-101教室'},
+            {value: 'TEACHING_BUILDING_B_CLASSROOM_102', description: '教学楼B-102教室'},
+            {value: 'TEACHING_BUILDING_B_CLASSROOM_201', description: '教学楼B-201教室'},
+            {value: 'TEACHING_BUILDING_B_CLASSROOM_202', description: '教学楼B-202教室'},
+            {value: 'TEACHING_BUILDING_B_CORRIDOR', description: '教学楼B-走廊'},
+            {value: 'TEACHING_BUILDING_B_STAIRS', description: '教学楼B-楼梯'},
+            {value: 'TEACHING_BUILDING_B_TOILET', description: '教学楼B-卫生间'}
+        ],
+        'LIBRARY_MAIN': [
+            {value: 'LIBRARY_MAIN_FLOOR_1', description: '主图书馆-1楼'},
+            {value: 'LIBRARY_MAIN_FLOOR_2', description: '主图书馆-2楼'},
+            {value: 'LIBRARY_MAIN_FLOOR_3', description: '主图书馆-3楼'},
+            {value: 'LIBRARY_MAIN_FLOOR_4', description: '主图书馆-4楼'},
+            {value: 'LIBRARY_MAIN_READING_ROOM', description: '主图书馆-阅览室'},
+            {value: 'LIBRARY_MAIN_STACK_ROOM', description: '主图书馆-书库'},
+            {value: 'LIBRARY_MAIN_ENTRANCE', description: '主图书馆-入口'},
+            {value: 'LIBRARY_MAIN_CORRIDOR', description: '主图书馆-走廊'},
+            {value: 'LIBRARY_MAIN_TOILET', description: '主图书馆-卫生间'}
+        ],
+        'DORMITORY_NORTH': [
+            {value: 'DORMITORY_NORTH_BUILDING_1', description: '北区宿舍-1号楼'},
+            {value: 'DORMITORY_NORTH_BUILDING_2', description: '北区宿舍-2号楼'},
+            {value: 'DORMITORY_NORTH_BUILDING_3', description: '北区宿舍-3号楼'},
+            {value: 'DORMITORY_NORTH_FLOOR_1', description: '北区宿舍-1楼'},
+            {value: 'DORMITORY_NORTH_FLOOR_2', description: '北区宿舍-2楼'},
+            {value: 'DORMITORY_NORTH_FLOOR_3', description: '北区宿舍-3楼'},
+            {value: 'DORMITORY_NORTH_FLOOR_4', description: '北区宿舍-4楼'},
+            {value: 'DORMITORY_NORTH_FLOOR_5', description: '北区宿舍-5楼'},
+            {value: 'DORMITORY_NORTH_FLOOR_6', description: '北区宿舍-6楼'},
+            {value: 'DORMITORY_NORTH_CORRIDOR', description: '北区宿舍-走廊'},
+            {value: 'DORMITORY_NORTH_TOILET', description: '北区宿舍-卫生间'}
+        ],
+        'CANTEEN_FIRST': [
+            {value: 'CANTEEN_FIRST_FLOOR_1', description: '第一食堂-1楼'},
+            {value: 'CANTEEN_FIRST_FLOOR_2', description: '第一食堂-2楼'},
+            {value: 'CANTEEN_FIRST_WINDOW_1', description: '第一食堂-1号窗口'},
+            {value: 'CANTEEN_FIRST_WINDOW_2', description: '第一食堂-2号窗口'},
+            {value: 'CANTEEN_FIRST_WINDOW_3', description: '第一食堂-3号窗口'},
+            {value: 'CANTEEN_FIRST_DINING_AREA', description: '第一食堂-用餐区'},
+            {value: 'CANTEEN_FIRST_ENTRANCE', description: '第一食堂-入口'}
+        ],
+        'SPORTS_FIELD': [
+            {value: 'SPORTS_FIELD_TRACK', description: '运动场-跑道'},
+            {value: 'SPORTS_FIELD_FOOTBALL', description: '运动场-足球场'},
+            {value: 'SPORTS_FIELD_BASKETBALL', description: '运动场-篮球场'},
+            {value: 'SPORTS_FIELD_VOLLEYBALL', description: '运动场-排球场'},
+            {value: 'SPORTS_FIELD_TENNIS', description: '运动场-网球场'},
+            {value: 'SPORTS_FIELD_STAND', description: '运动场-看台'},
+            {value: 'SPORTS_FIELD_ENTRANCE', description: '运动场-入口'}
+        ]
+        // 可以继续添加其他地点的详细位置
+    };
+    
+    return detailedLocationsMap[location] || [];
+}
+</script>
+</body>
+</html>
+
