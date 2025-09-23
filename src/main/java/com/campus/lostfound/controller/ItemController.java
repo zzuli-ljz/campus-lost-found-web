@@ -286,43 +286,56 @@ public class ItemController {
     }
     
     /**
-     * 获取用户的匹配物品
+     * 我的匹配（分组预览：每个物品的候选列表）
      */
     @GetMapping("/matches")
-    public String getMatches(@AuthenticationPrincipal User user, Model model) {
+    public String getMatches(@AuthenticationPrincipal User user, Model model,
+                             @RequestParam(name = "days", required = false, defaultValue = "30") int days,
+                             @RequestParam(name = "limit", required = false, defaultValue = "5") int limit) {
         if (user == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
-        
-        List<ItemMatch> matches = itemService.getUserMatches(user);
+        try {
+            List<com.campus.lostfound.service.dto.UserItemCandidates> groups = itemService.suggestMatchesForUser(user, days, limit);
+            model.addAttribute("groups", groups);
+        } catch (Exception e) {
+            log.error("获取我的匹配候选失败: {}", e.getMessage(), e);
+            model.addAttribute("groups", java.util.Collections.emptyList());
+            model.addAttribute("error", "加载我的匹配失败");
+        }
         model.addAttribute("user", user);
-        model.addAttribute("matches", matches);
-        
+        model.addAttribute("days", days);
+        model.addAttribute("limit", limit);
         return "matches";
     }
     
     /**
-     * 获取与指定物品匹配的所有物品
+     * 获取与指定物品匹配的所有候选项（带评分）
      */
     @GetMapping("/{id}/matches")
-    public String getItemMatches(@PathVariable Long id, @AuthenticationPrincipal User user, Model model) {
+    public String getItemMatches(@PathVariable Long id, @AuthenticationPrincipal User user, Model model,
+                                 @RequestParam(name = "days", required = false, defaultValue = "30") int days,
+                                 @RequestParam(name = "limit", required = false, defaultValue = "20") int limit) {
         if (user == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
-        
-        Item item = itemService.findById(id)
-                .orElseThrow(() -> new RuntimeException("物品不存在"));
-        
-        // 只有物品所有者可以查看匹配
-        if (!user.getId().equals(item.getOwner().getId())) {
-            return "redirect:/items/my-items";
+        try {
+            Item item = itemService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("物品不存在"));
+            if (!user.getId().equals(item.getOwner().getId())) {
+                return "redirect:/items/my-items";
+            }
+            List<com.campus.lostfound.service.dto.MatchCandidate> candidates = itemService.suggestMatchesForItem(item, days, limit);
+            model.addAttribute("item", item);
+            model.addAttribute("candidates", candidates);
+        } catch (Exception e) {
+            log.error("加载物品候选失败, itemId={}: {}", id, e.getMessage(), e);
+            // 尝试将基本信息放入页面，避免 500
+            itemService.findById(id).ifPresent(i -> model.addAttribute("item", i));
+            model.addAttribute("candidates", java.util.Collections.emptyList());
+            model.addAttribute("error", "加载候选失败");
         }
-        
-        List<Item> matchingItems = itemService.getMatchingItemsForItem(item);
         model.addAttribute("user", user);
-        model.addAttribute("item", item);
-        model.addAttribute("matchingItems", matchingItems);
-        
         return "item-matches";
     }
     @PostMapping("/{id}/delete")
@@ -480,6 +493,27 @@ public class ItemController {
         } catch (Exception e) {
             model.addAttribute("error", "获取物品信息失败: " + e.getMessage());
             return "error";
+        }
+    }
+
+    /** 从候选创建匹配（用户确认） */
+    @PostMapping("/{id}/confirm-match")
+    public String confirmMatch(@PathVariable Long id,
+                               @RequestParam("candidateId") Long candidateId,
+                               @RequestParam("score") double score,
+                               @AuthenticationPrincipal User user,
+                               RedirectAttributes redirectAttributes) {
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        try {
+            ItemMatch match = itemService.createConfirmedMatch(id, candidateId, score);
+            redirectAttributes.addFlashAttribute("success", "匹配已创建");
+            return "redirect:/matches/history";
+        } catch (Exception e) {
+            log.error("确认匹配失败: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "确认匹配失败: " + e.getMessage());
+            return "redirect:/items/" + id + "/matches";
         }
     }
 }

@@ -3,133 +3,91 @@
 <head th:replace="layout/base :: head"></head>
 <body>
     <div th:replace="layout/base :: navbar"></div>
-    
+    <main class="main-content">
     <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-link"></i> 我的匹配</h2>
-                    <a href="/items/my-items" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left"></i> 返回我的物品
-                    </a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2><i class="bi bi-link-45deg"></i> 我的匹配</h2>
+            <a href="/items/my-items" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> 返回我的物品
+            </a>
+        </div>
+
+        <!-- 过滤与统计 -->
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-md-8">
+                <div class="alert alert-light border d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-filter me-2"></i>
+                        显示近 <strong th:text="${days}">30</strong> 天内候选；每个物品最多 <strong th:text="${limit}">5</strong> 条
+                    </div>
+                    <form method="get" class="d-flex align-items-center gap-2">
+                        <input type="number" min="1" max="180" class="form-control form-control-sm" name="days" th:value="${days}" placeholder="天数" style="width:100px"/>
+                        <input type="number" min="1" max="50" class="form-control form-control-sm" name="limit" th:value="${limit}" placeholder="上限" style="width:100px"/>
+                        <button class="btn btn-sm btn-primary" type="submit"><i class="bi bi-check2"></i> 应用</button>
+                    </form>
                 </div>
-                
-                <!-- 匹配统计 -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body">
-                                <h5 class="card-title">活跃匹配</h5>
-                                <h3 th:text="${matches.size()}">0</h3>
-                            </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card text-white" style="background: linear-gradient(135deg,#36d1dc,#5b86e5);">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small opacity-75">涉及物品</div>
+                            <div class="h4 mb-0" th:text="${groups != null ? groups.size() : 0}">0</div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <h5 class="card-title">已解决</h5>
-                                <h3>0</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-info text-white">
-                            <div class="card-body">
-                                <h5 class="card-title">总匹配</h5>
-                                <h3 th:text="${matches.size()}">0</h3>
-                            </div>
-                        </div>
+                        <i class="bi bi-collection fa-2x opacity-75"></i>
                     </div>
                 </div>
-                
-                <!-- 匹配列表 -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">匹配记录</h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:if="${matches.isEmpty()}" class="text-center py-5">
-                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                            <h4 class="text-muted">暂无匹配记录</h4>
-                            <p class="text-muted">当您的物品与其他用户的物品匹配时，会在这里显示</p>
-                            <a href="/items/post" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> 发布物品
-                            </a>
+            </div>
+        </div>
+
+        <!-- 分组列表 -->
+        <div th:if="${#lists.isEmpty(groups)}" class="text-center py-5">
+            <i class="bi bi-search text-muted" style="font-size:3rem;"></i>
+            <h4 class="text-muted mt-3">暂无匹配候选</h4>
+            <p class="text-muted">完善地点、详细地点、时间与描述可获得更精准的候选。</p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(groups)}" class="accordion" id="userItemsAccordion">
+            <div class="accordion-item mb-3" th:each="g,stat : ${groups}">
+                <h2 class="accordion-header" th:attr="id='heading-'+${stat.index}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#collapse-'+${stat.index}" aria-expanded="true" th:attrappend=" aria-controls='collapse-'+${stat.index}">
+                        <div class="d-flex flex-column">
+                            <span class="fw-semibold" th:text="${g.item.title}">物品标题</span>
+                            <small class="text-muted">类型：<span th:text="${g.item.postType.description}">类型</span> · 类别：<span th:text="${g.item.category.description}">类别</span> · 地点：<span th:text="${g.item.location.description}">地点</span></small>
                         </div>
-                        
-                        <div th:if="${!matches.isEmpty()}" class="row">
-                            <div th:each="match : ${matches}" class="col-md-6 mb-4">
-                                <div class="card h-100" th:class="${match.status.name() == 'COMPLETED'} ? 'opacity-50' : ''">
+                    </button>
+                </h2>
+                <div class="accordion-collapse collapse show" th:attr="id='collapse-'+${stat.index}" th:attrappend=" aria-labelledby='heading-'+${stat.index}" data-bs-parent="#userItemsAccordion">
+                    <div class="accordion-body">
+                        <div th:if="${#lists.isEmpty(g.candidates)}" class="text-muted">该物品暂无候选。</div>
+                        <div th:if="${!#lists.isEmpty(g.candidates)}" class="row">
+                            <div class="col-12 col-lg-6 mb-3" th:each="mc : ${g.candidates}">
+                                <div class="card h-100 shadow-sm">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div class="d-flex gap-2">
-                                            <span class="badge bg-success">匹配权重: <span th:text="${match.matchWeight}">0</span></span>
-                                            <span th:if="${match.status.name() == 'ACTIVE'}" class="badge bg-primary">进行中</span>
-                                            <span th:if="${match.status.name() == 'COMPLETED'}" class="badge bg-dark">已完成</span>
-                                            <span th:if="${match.status.name() == 'EXPIRED'}" class="badge bg-secondary">已过期</span>
-                                            <span th:if="${match.status.name() == 'CANCELLED'}" class="badge bg-danger">已取消</span>
-                                        </div>
-                                        <small class="text-muted" th:text="${#temporals.format(match.matchedAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</small>
+                                        <span class="badge rounded-pill" th:style="'background:'+ (${mc.score} >= 0.75 ? '#28a745' : (${mc.score} >= 0.6 ? '#17a2b8' : '#ffc107'))">
+                                            匹配分数 <strong th:text="${#numbers.formatDecimal(mc.score*100,0,0)} + '%'">80%</strong>
+                                        </span>
+                                        <small class="text-muted"><i class="bi bi-clock"></i> <span th:text="${#temporals.format(mc.candidate.lostFoundTime,'yyyy-MM-dd HH:mm')}">时间</span></small>
                                     </div>
                                     <div class="card-body">
-                                        <div class="row">
-                                            <!-- 失物信息 -->
-                                            <div class="col-md-6">
-                                                <h6 class="text-danger">
-                                                    <i class="fas fa-exclamation-triangle"></i> 失物
-                                                </h6>
-                                                <div class="border rounded p-3 mb-3">
-                                                    <h6 th:text="${match.lostItem.title}">物品标题</h6>
-                                                    <p class="text-muted small mb-2" th:text="${match.lostItem.description}">物品描述</p>
-                                                    <div class="d-flex justify-content-between">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-map-marker-alt"></i>
-                                                            <span th:text="${match.lostItem.location.description}">地点</span>
-                                                        </small>
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-user"></i>
-                                                            <span th:text="${match.lostItem.owner.displayName}">发布者</span>
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- 拾获信息 -->
-                                            <div class="col-md-6">
-                                                <h6 class="text-success">
-                                                    <i class="fas fa-check-circle"></i> 拾获
-                                                </h6>
-                                                <div class="border rounded p-3 mb-3">
-                                                    <h6 th:text="${match.foundItem.title}">物品标题</h6>
-                                                    <p class="text-muted small mb-2" th:text="${match.foundItem.description}">物品描述</p>
-                                                    <div class="d-flex justify-content-between">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-map-marker-alt"></i>
-                                                            <span th:text="${match.foundItem.location.description}">地点</span>
-                                                        </small>
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-user"></i>
-                                                            <span th:text="${match.foundItem.owner.displayName}">发布者</span>
-                                                        </small>
-                                                    </div>
-                                                </div>
+                                        <h6 class="mb-1" th:text="${mc.candidate.title}">标题</h6>
+                                        <p class="text-muted small mb-2" th:text="${mc.candidate.description}">描述</p>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <span class="badge bg-secondary" th:text="${mc.candidate.postType.description}">类型</span>
+                                            <span class="badge bg-info" th:text="${mc.candidate.category.description}">类别</span>
+                                            <span class="badge bg-light text-dark"><i class="bi bi-geo-alt"></i> <span th:text="${mc.candidate.location.description}">地点</span></span>
+                                        </div>
+                                        <div>
+                                            <div class="small text-muted mb-1"><i class="bi bi-layers"></i> 重叠要素</div>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <span th:each="r : ${mc.overlapReasons}" class="badge bg-outline border text-secondary" th:text="${r}">重叠</span>
                                             </div>
                                         </div>
-                                        
-                                        <!-- 操作按钮 -->
-                                        <div class="d-flex gap-2">
-                                            <a th:href="@{'/items/' + ${match.lostItem.id}}" class="btn btn-outline-danger btn-sm">
-                                                <i class="fas fa-eye"></i> 查看失物
-                                            </a>
-                                            <a th:href="@{'/items/' + ${match.foundItem.id}}" class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-eye"></i> 查看拾获
-                                            </a>
-                                            <a th:if="${match.status.name() == 'ACTIVE'}" th:href="@{'/chat/' + ${match.lostItem.id}}" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-comments"></i> 联系对方
-                                            </a>
-                                            <span th:if="${match.status.name() == 'COMPLETED'}" class="btn btn-secondary btn-sm disabled">
-                                                <i class="fas fa-check"></i> 已完成
-                                            </span>
-                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex gap-2">
+                                        <a th:href="@{'/items/' + ${g.item.id} + '/matches'}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-list-stars"></i> 查看该物品全部候选</a>
+                                        <a th:href="@{'/items/' + ${mc.candidate.id}}" class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i> 查看详情</a>
+                                        <a th:href="@{'/chat/' + ${mc.candidate.id}}" class="btn btn-primary btn-sm"><i class="bi bi-chat-dots"></i> 联系对方</a>
                                     </div>
                                 </div>
                             </div>
@@ -139,10 +97,8 @@
             </div>
         </div>
     </div>
-    
+    </main>
     <div th:replace="layout/base :: footer"></div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

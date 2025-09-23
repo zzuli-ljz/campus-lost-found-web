@@ -19,8 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 物品服务类
@@ -493,6 +495,92 @@ public class ItemService {
     }
     
     /**
+     * 为单个物品给出候选匹配建议，返回带评分的列表
+     */
+    public List<com.campus.lostfound.service.dto.MatchCandidate> suggestMatchesForItem(Item item, int daysWindow, int maxResults) {
+        Item.PostType oppositeType = item.getPostType() == Item.PostType.LOST ?
+                Item.PostType.FOUND : Item.PostType.LOST;
+        LocalDateTime since = LocalDateTime.now().minusDays(daysWindow <= 0 ? 30 : daysWindow);
+        List<Item> candidates = itemRepository.findCandidateItemsSince(oppositeType, since);
+        List<com.campus.lostfound.service.dto.MatchCandidate> scored = new ArrayList<>();
+
+        for (Item candidate : candidates) {
+            if (candidate.getId().equals(item.getId())) continue;
+            if (!candidate.isApproved()) continue;
+            if (!candidate.isActive()) continue;
+            if (itemMatchRepository.existsMatchBetweenItems(item, candidate)) continue;
+
+            double score = 0.0;
+            List<String> reasons = new ArrayList<>();
+
+            // 位置主类相同占 0.35
+            if (item.getLocation() != null && item.getLocation().equals(candidate.getLocation())) {
+                score += 0.35; reasons.add("地点相同");
+            }
+            // 详细地点相同占 0.20
+            if (item.getDetailedLocation() != null && item.getDetailedLocation().equals(candidate.getDetailedLocation())) {
+                score += 0.20; reasons.add("详细地点相同");
+            }
+            // 类别相同占 0.20
+            if (item.getCategory() != null && item.getCategory().equals(candidate.getCategory())) {
+                score += 0.20; reasons.add("类别相同");
+            }
+            // 时间接近（丢失/拾获时间差 <= 3 天 -> 0.15；<= 7 天 -> 0.08）
+            if (item.getLostFoundTime() != null && candidate.getLostFoundTime() != null) {
+                long days = Math.abs(java.time.temporal.ChronoUnit.DAYS.between(item.getLostFoundTime(), candidate.getLostFoundTime()));
+                if (days <= 3) { score += 0.15; reasons.add("时间非常接近"); }
+                else if (days <= 7) { score += 0.08; reasons.add("时间较接近"); }
+            }
+            // 文本相似度（标题+描述）简单打分，占 0.10
+            double textScore = simpleTextSimilarity(item.getTitle() + " " + item.getDescription(),
+                    candidate.getTitle() + " " + candidate.getDescription());
+            score += Math.min(0.10, textScore * 0.10);
+            if (textScore >= 0.5) reasons.add("文本高度相似");
+            else if (textScore >= 0.25) reasons.add("文本有一定相似");
+
+            if (score >= 0.40) { // 建议阈值，低于则不展示
+                scored.add(new com.campus.lostfound.service.dto.MatchCandidate(candidate, round2(score), reasons));
+            }
+        }
+
+        return scored.stream()
+                .sorted(Comparator.comparingDouble(com.campus.lostfound.service.dto.MatchCandidate::getScore).reversed())
+                .limit(maxResults <= 0 ? 20 : maxResults)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取用户所有物品的候选匹配分组
+     */
+    public List<com.campus.lostfound.service.dto.UserItemCandidates> suggestMatchesForUser(User user, int daysWindow, int limitPerItem) {
+        List<Item> myItems = getUserItems(user);
+        List<com.campus.lostfound.service.dto.UserItemCandidates> result = new ArrayList<>();
+        for (Item item : myItems) {
+            if (!item.isApproved()) continue; // 只有已审核的物品参与匹配
+            List<com.campus.lostfound.service.dto.MatchCandidate> list = suggestMatchesForItem(item, daysWindow, limitPerItem);
+            result.add(new com.campus.lostfound.service.dto.UserItemCandidates(item, list));
+        }
+        return result;
+    }
+
+    private double simpleTextSimilarity(String a, String b) {
+        if (a == null || b == null) return 0.0;
+        String[] tokensA = a.toLowerCase().replaceAll("[^\\u4e00-\\u9fa5a-z0-9]", " ").split("\\s+");
+        String[] tokensB = b.toLowerCase().replaceAll("[^\\u4e00-\\u9fa5a-z0-9]", " ").split("\\s+");
+        java.util.Set<String> setA = new java.util.HashSet<>();
+        java.util.Set<String> setB = new java.util.HashSet<>();
+        for (String t : tokensA) { if (t.length() >= 2) setA.add(t); }
+        for (String t : tokensB) { if (t.length() >= 2) setB.add(t); }
+        if (setA.isEmpty() || setB.isEmpty()) return 0.0;
+        java.util.Set<String> inter = new java.util.HashSet<>(setA);
+        inter.retainAll(setB);
+        double jaccard = (double) inter.size() / (double) (setA.size() + setB.size() - inter.size());
+        return jaccard; // 0~1
+    }
+
+    private double round2(double v) { return Math.round(v * 100.0) / 100.0; }
+    
+    /**
      * 从文本中提取关键词
      */
     private String extractKeywords(String text) {
@@ -500,5 +588,24 @@ public class ItemService {
         return text.toLowerCase()
                 .replaceAll("[^\\u4e00-\\u9fa5a-zA-Z0-9\\s]", " ")
                 .trim();
+    }
+
+    /**
+     * 用户在候选列表中“确认创建匹配”，使用候选分数作为快照写入 matchWeight
+     */
+    @Transactional
+    public ItemMatch createConfirmedMatch(Long sourceItemId, Long candidateItemId, double snapshotScore) {
+        Item source = itemRepository.findById(sourceItemId)
+                .orElseThrow(() -> new RuntimeException("物品不存在"));
+        Item candidate = itemRepository.findById(candidateItemId)
+                .orElseThrow(() -> new RuntimeException("候选物品不存在"));
+        if (source.getPostType() == candidate.getPostType()) {
+            throw new RuntimeException("匹配类型不符");
+        }
+        if (itemMatchRepository.existsMatchBetweenItems(source, candidate)) {
+            List<ItemMatch> existing = itemMatchRepository.findMatchBetweenItems(source, candidate);
+            return existing.isEmpty() ? null : existing.get(0);
+        }
+        return matchingService.createMatch(source, candidate, snapshotScore);
     }
 }

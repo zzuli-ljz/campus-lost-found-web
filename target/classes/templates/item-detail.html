@@ -80,6 +80,12 @@
                 </div>
             </div>
             <div class="col-md-4">
+                <div class="mb-3 d-grid" sec:authorize="isAuthenticated()">
+                    <a class="btn btn-outline-primary" th:if="${user != null and item.owner.id == user.id}"
+                       th:href="@{'/items/' + ${item.id} + '/matches'}">
+                        <i class="bi bi-stars"></i> 查看该物品的可能匹配
+                    </a>
+                </div>
                 <div class="mb-3">
                     <label class="form-label">发布流程</label>
                     <div class="progress-steps" th:with="step=${item.approved} ? 4 : 2">

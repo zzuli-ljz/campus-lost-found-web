@@ -66,6 +66,12 @@ public interface ItemMatchRepository extends JpaRepository<ItemMatch, Long> {
     boolean existsMatchBetweenItems(@Param("item1") Item item1, @Param("item2") Item item2);
     
     /**
+     * 获取两个物品之间的匹配记录（无序）
+     */
+    @Query("SELECT m FROM ItemMatch m WHERE (m.lostItem = :a AND m.foundItem = :b) OR (m.lostItem = :b AND m.foundItem = :a)")
+    List<ItemMatch> findMatchBetweenItems(@Param("a") Item a, @Param("b") Item b);
+    
+    /**
      * 统计用户的匹配数量
      */
     @Query("SELECT COUNT(m) FROM ItemMatch m WHERE " +
@@ -84,6 +90,10 @@ public interface ItemMatchRepository extends JpaRepository<ItemMatch, Long> {
     @Query("SELECT m FROM ItemMatch m WHERE m.lostItem = :item OR m.foundItem = :item")
     List<ItemMatch> findByLostItemOrFoundItem(@Param("item") Item item);
 }
+
+
+
+
 
 
 

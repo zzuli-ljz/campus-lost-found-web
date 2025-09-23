@@ -138,7 +138,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findExpiredItems(@Param("expiryDate") LocalDateTime expiryDate);
     
     /**
-     * 根据权重和地点查找匹配物品
+     * 根据权重和地点查找匹配物品（旧规则使用）
      */
     @Query("SELECT i FROM Item i WHERE " +
            "i.approved = true AND " +
@@ -149,6 +149,17 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findMatchingItemsByWeight(@Param("postType") Item.PostType postType,
                                          @Param("weight") Integer weight,
                                          @Param("location") Location location);
+
+    /**
+     * 候选匹配预筛：相反类型、已审核、状态进行中，时间在给定起点之后
+     */
+    @Query("SELECT i FROM Item i WHERE " +
+           "i.approved = true AND " +
+           "i.postType = :postType AND " +
+           "i.status = 'PENDING_CLAIM' AND " +
+           "i.createdAt >= :since")
+    List<Item> findCandidateItemsSince(@Param("postType") Item.PostType postType,
+                                       @Param("since") LocalDateTime since);
 
     /**
      * 统计已完成物品数量
