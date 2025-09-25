@@ -32,7 +32,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-lg" th:fragment="navbar" th:classappend="${#authorization.expression('hasRole(''ADMIN'')')}? ' bg-dark' : ' bg-primary'">
         <div class="container">
             <a class="navbar-brand fw-bold animate__animated animate__fadeInLeft" th:href="@{${#authorization.expression('hasRole(''ADMIN'')')} ? '/admin' : '/'}">
-                <i class="bi bi-search-heart me-2"></i>
+                <img src="https://www.zzuli.edu.cn/_upload/tpl/0a/22/2594/template2594/images/logo.png" alt="郑州轻工业大学" style="height: 32px; width: auto; margin-right: 8px;">
                 校园失物招领
             </a>
             
@@ -138,33 +138,34 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5 class="mb-3 text-white">
+                    <h5 class="mb-3">
                         <i class="bi bi-search-heart me-2"></i>校园失物招领系统
                     </h5>
-                    <p class="text-light mb-0">帮助同学们快速找回丢失的物品，构建和谐校园环境。</p>
+                    <p class="text-light">帮助同学们快速找回丢失的物品，构建和谐校园环境。</p>
                 </div>
                 <div class="col-md-3">
-                    <h6 class="mb-3 text-white">快速链接</h6>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><a th:href="@{/}" class="text-light text-decoration-none">首页</a></li>
-                        <li class="mb-2"><a th:href="@{/search}" class="text-light text-decoration-none">搜索</a></li>
-                        <li class="mb-2"><a th:href="@{/about}" class="text-light text-decoration-none">关于我们</a></li>
-                        <li class="mb-0"><a th:href="@{/help}" class="text-light text-decoration-none">帮助</a></li>
+                    <h6 class="mb-3">快速链接</h6>
+                    <ul class="list-unstyled">
+                        <li><a th:href="@{/}" class="text-light text-decoration-none">首页</a></li>
+                        <li><a th:href="@{/search}" class="text-light text-decoration-none">搜索</a></li>
+                        <li><a th:href="@{/about}" class="text-light text-decoration-none">关于我们</a></li>
+                        <li><a href="https://www.zzuli.edu.cn/" class="text-light text-decoration-none" target="_blank">学校官网</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <h6 class="mb-3 text-white">联系我们</h6>
-                    <p class="text-light mb-2">
-                        <i class="bi bi-envelope me-2"></i>contact@campus.edu
+                    <h6 class="mb-3">联系我们</h6>
+                    <p class="text-light mb-1">
+                        <i class="bi bi-envelope me-2"></i>542312320310@zzuli.edu.cn
                     </p>
                     <p class="text-light mb-0">
                         <i class="bi bi-telephone me-2"></i>400-123-4567
                     </p>
                 </div>
             </div>
-            <div class="row align-items-center mt-4 pt-3" style="border-top: 1px solid #495057;">
+            <hr class="my-4">
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0 text-light">&copy; 2024 校园失物招领系统. 保留所有权利.</p>
+                    <p class="mb-0 text-light">&copy; 2025 校园失物招领系统. 保留所有权利.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <small class="text-light">基于 Spring Boot + Thymeleaf 构建</small>

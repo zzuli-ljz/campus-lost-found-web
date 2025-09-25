@@ -9,13 +9,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap">
     <link th:href="@{/css/style.css}" rel="stylesheet">
+    <style>
+        .carousel-image {
+            max-width: 100%;
+            max-height: 300px;
+            width: auto;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .carousel-image:hover {
+            transform: scale(1.02);
+        }
+        
+        #heroCarousel {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .carousel-inner {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-lg">
         <div class="container">
             <a class="navbar-brand fw-bold animate__animated animate__fadeInLeft" th:href="@{/}">
-                <i class="bi bi-search-heart me-2"></i>
+                <img src="https://www.zzuli.edu.cn/_upload/tpl/0a/22/2594/template2594/images/logo.png" alt="郑州轻工业大学" style="height: 30px; width: auto; margin-right: 8px;">
                 校园失物招领
             </a>
             
@@ -123,7 +148,22 @@
                     </div>
                     <div class="col-lg-6 animate__animated animate__fadeInRight">
                         <div class="hero-image text-center">
-                            <i class="bi bi-search-heart display-1 text-primary animate__animated animate__float"></i>
+                            <!-- 图片轮播 -->
+                            <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <img src="https://www.zzuli.edu.cn/_upload/article/images/d7/aa/a92cbba747a994573e424b72794a/44dc944c-a439-45f3-bfbf-764e9b322246.jpg" class="d-block mx-auto carousel-image" alt="校园生活1">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="https://www.zzuli.edu.cn/_upload/article/images/e9/3c/4256d2264534a039adacbfc00488/e0cf62d4-0928-48c5-ab24-bd719a08aeb2.jpg" class="d-block mx-auto carousel-image" alt="校园生活2">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="https://www.zzuli.edu.cn/_upload/article/images/05/26/55d293f3466494936015b82631c3/1c575830-c5d0-481c-b17c-0be9e47db387.jpg" class="d-block mx-auto carousel-image" alt="校园生活3">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="https://www.zzuli.edu.cn/_upload/article/images/0a/e6/9e398dde4249a80653b51d8e50ac/cf1268c4-8a21-447d-a659-dfcda1f47f1f.jpg" class="d-block mx-auto carousel-image" alt="校园生活4">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -358,23 +398,23 @@
                     <h5 class="mb-3">
                         <i class="bi bi-search-heart me-2"></i>校园失物招领系统
                     </h5>
-                    <p class="text-muted">帮助同学们快速找回丢失的物品，构建和谐校园环境。</p>
+                    <p class="text-light">帮助同学们快速找回丢失的物品，构建和谐校园环境。</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="mb-3">快速链接</h6>
                     <ul class="list-unstyled">
-                        <li><a th:href="@{/}" class="text-muted text-decoration-none">首页</a></li>
-                        <li><a th:href="@{/search}" class="text-muted text-decoration-none">搜索</a></li>
-                        <li><a th:href="@{/about}" class="text-muted text-decoration-none">关于我们</a></li>
-                        <li><a th:href="@{/help}" class="text-muted text-decoration-none">帮助</a></li>
+                        <li><a th:href="@{/}" class="text-light text-decoration-none">首页</a></li>
+                        <li><a th:href="@{/search}" class="text-light text-decoration-none">搜索</a></li>
+                        <li><a th:href="@{/about}" class="text-light text-decoration-none">关于我们</a></li>
+                        <li><a href="https://www.zzuli.edu.cn/" class="text-light text-decoration-none" target="_blank">学校官网</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
                     <h6 class="mb-3">联系我们</h6>
-                    <p class="text-muted mb-1">
-                        <i class="bi bi-envelope me-2"></i>contact@campus.edu
+                    <p class="text-light mb-1">
+                        <i class="bi bi-envelope me-2"></i>542312320310@zzuli.edu.cn
                     </p>
-                    <p class="text-muted mb-0">
+                    <p class="text-light mb-0">
                         <i class="bi bi-telephone me-2"></i>400-123-4567
                     </p>
                 </div>
@@ -382,10 +422,10 @@
             <hr class="my-4">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0 text-muted">&copy; 2024 校园失物招领系统. 保留所有权利.</p>
+                    <p class="mb-0 text-light">&copy; 2025 校园失物招领系统. 保留所有权利.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <small class="text-muted">基于 Spring Boot + Thymeleaf 构建</small>
+                    <small class="text-light">基于 Spring Boot + Thymeleaf 构建</small>
                 </div>
             </div>
         </div>
