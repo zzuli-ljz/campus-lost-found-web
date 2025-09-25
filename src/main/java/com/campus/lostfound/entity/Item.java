@@ -84,7 +84,7 @@ public class Item extends BaseEntity {
     
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Claim> claims = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChatThread> chatThreads = new ArrayList<>();
     

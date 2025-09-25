@@ -80,6 +80,10 @@ public class UserService implements UserDetailsService {
         return savedUser;
     }
     
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
     /**
      * 根据ID查找用户
      */
@@ -200,12 +204,12 @@ public class UserService implements UserDetailsService {
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
-        
-        // 检查是否为管理员
-        if (user.getRole() == User.UserRole.ADMIN) {
-            throw new RuntimeException("不能删除管理员用户");
+
+        // 检查是否为 admin 用户
+        if ("admin".equals(user.getUsername())) {
+            throw new RuntimeException("不能删除admin用户");
         }
-        
+
         userRepository.delete(user);
         log.info("用户删除成功: {}", user.getUsername());
     }

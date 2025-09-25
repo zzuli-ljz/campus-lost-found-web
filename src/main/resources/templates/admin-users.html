@@ -6,7 +6,10 @@
     <div th:replace="layout/base :: navbar"></div>
     <main class="main-content">
     <div class="container py-4">
-        <h2 class="mb-4">用户管理</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">用户管理</h2>
+            <a th:href="@{/admin/users/add}" class="btn btn-primary">添加用户</a>
+        </div>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -26,12 +29,15 @@
                 <td th:text="${u.role}">role</td>
                 <td th:text="${u.enabled} ? '启用' : '禁用'">status</td>
                 <td class="d-flex gap-2">
-                    <form th:action="@{'/admin/users/' + ${u.id} + '/toggle'}" method="post">
+                    <form th:action="@{'/admin/users/' + ${u.id} + '/toggle'}" method="post" class="d-inline">
                         <button class="btn btn-sm" th:classappend="${u.enabled} ? 'btn-warning' : 'btn-success'" th:text="${u.enabled} ? '禁用' : '启用'"></button>
                     </form>
-                    <form th:action="@{'/admin/users/' + ${u.id} + '/reset-password'}" method="post">
-                        <input type="hidden" name="newPassword" value="user123" />
+                    <form th:action="@{'/admin/users/' + ${u.id} + '/reset-password'}" method="post" class="d-inline">
+                        <input type="hidden" name="newPassword" value="123456" />
                         <button class="btn btn-sm btn-primary" type="submit">重置密码</button>
+                    </form>
+                    <form th:action="@{'/admin/users/' + ${u.id} + '/delete'}" method="post" class="d-inline">
+                        <button class="btn btn-sm btn-danger" type="submit" th:disabled="${u.username=='admin'}">删除</button>
                     </form>
                 </td>
             </tr>
@@ -41,6 +47,8 @@
     </main>
     <div th:replace="layout/base :: footer"></div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

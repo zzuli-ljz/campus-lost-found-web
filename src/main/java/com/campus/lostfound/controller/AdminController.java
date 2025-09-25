@@ -65,6 +65,31 @@ public class AdminController {
         return "admin-users";
     }
 
+    @GetMapping("/users/{id}")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public User getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("/users/add")
+    public String addUserForm() {
+        return "admin-user-add";
+    }
+
+    @PostMapping("/users/add")
+    public String addUser(@RequestParam String username, @RequestParam String displayName, @RequestParam String studentId, 
+                          @RequestParam(required = false) String email, @RequestParam(required = false) String phone, 
+                          @RequestParam String password, @RequestParam User.UserRole role) {
+        userService.register(username, displayName, studentId, email, phone, password, role);
+        return "redirect:/admin/admins";
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/users/{id}/delete")
+    public String deleteUser(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        userService.deleteUser(id);
+        return "redirect:/admin/admins";
+    }
+
     @org.springframework.web.bind.annotation.PostMapping("/users/{id}/toggle")
     public String toggleUser(@org.springframework.web.bind.annotation.PathVariable Long id) {
         userService.toggleUserStatus(id);

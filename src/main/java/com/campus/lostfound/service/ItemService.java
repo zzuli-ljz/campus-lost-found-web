@@ -338,29 +338,19 @@ public class ItemService {
     public void deleteItem(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("物品不存在"));
-        
+
         // 删除相关图片
         try {
             fileStorageService.deleteItemImages(item);
         } catch (IOException e) {
             log.error("删除物品图片失败: {}", e.getMessage());
         }
-        
+
         // 先清理依赖关系（匹配、认领、通知、举报）
         itemMatchRepository.deleteByItem(item);
-        com.campus.lostfound.repository.ClaimRepository claimRepository = null; // will be injected via field if exists
-        com.campus.lostfound.repository.NotificationRepository notificationRepository = null; // same
-        com.campus.lostfound.repository.ReportRepository reportRepository = null; // same
-        try {
-            // 使用 Spring 上下文已注入的bean（这些字段应当在类上声明为 final，并通过构造器注入）。
-            claimRepository = this.claimRepository;
-            notificationRepository = this.notificationRepository;
-            reportRepository = this.reportRepository;
-        } catch (Exception ignored) {
-        }
-        if (claimRepository != null) claimRepository.deleteByItem(item);
-        if (notificationRepository != null) notificationRepository.deleteByRelatedItem(item);
-        if (reportRepository != null) reportRepository.deleteAll(reportRepository.findAll().stream().filter(r -> r.getItem().getId().equals(item.getId())).toList());
+        claimRepository.deleteByItem(item);
+        notificationRepository.deleteByRelatedItem(item);
+        reportRepository.deleteByItemIdNative(item.getId());
 
         itemRepository.delete(item);
         log.info("物品删除成功: {}", item.getTitle());

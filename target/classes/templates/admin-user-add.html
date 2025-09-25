@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/base :: head"></head>
+<body>
+<div>
+    <div th:replace="layout/base :: navbar"></div>
+    <main class="main-content">
+    <div class="container py-4">
+        <h2 class="mb-4">添加新用户</h2>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form th:action="@{/admin/users/add}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="displayName" class="form-label">显示名</label>
+                        <input type="text" class="form-control" id="displayName" name="displayName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="studentId" class="form-label">学号</label>
+                        <input type="text" class="form-control" id="studentId" name="studentId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">邮箱</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">手机号</label>
+                        <input type="text" class="form-control" id="phone" name="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密码</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">角色</label>
+                        <select class="form-select" id="role" name="role">
+                            <option value="USER">普通用户</option>
+                            <option value="ADMIN">管理员</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">添加用户</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    </main>
+    <div th:replace="layout/base :: footer"></div>
+</div>
+</body>
+</html>

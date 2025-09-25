@@ -31,7 +31,7 @@
     <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-lg" th:fragment="navbar" th:classappend="${#authorization.expression('hasRole(''ADMIN'')')}? ' bg-dark' : ' bg-primary'">
         <div class="container">
-            <a class="navbar-brand fw-bold animate__animated animate__fadeInLeft" th:href="@{/}">
+            <a class="navbar-brand fw-bold animate__animated animate__fadeInLeft" th:href="@{${#authorization.expression('hasRole(''ADMIN'')')} ? '/admin' : '/'}">
                 <i class="bi bi-search-heart me-2"></i>
                 校园失物招领
             </a>
