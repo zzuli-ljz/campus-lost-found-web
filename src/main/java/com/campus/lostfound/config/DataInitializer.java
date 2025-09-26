@@ -162,29 +162,29 @@ public class DataInitializer implements CommandLineRunner {
         List<Item> testItems = Arrays.asList(
             // 失物
             createItem("丢失iPhone 15", "昨天在图书馆三楼自习时丢失了一部iPhone 15，黑色，有白色手机壳。手机里有很多重要资料，请拾到者联系我。", 
-                      Item.ItemCategory.ELECTRONICS, Item.PostType.LOST, "图书馆三楼", "自习区A区", user1),
+                      Item.ItemCategory.MOBILE_PHONE, Item.PostType.LOST, "图书馆三楼", "自习区A区", user1),
             
             createItem("丢失学生证", "在食堂吃饭时丢失了学生证，姓名张三，学号20240002。请拾到者联系我，必有重谢。", 
-                      Item.ItemCategory.DOCUMENTS, Item.PostType.LOST, "第一食堂", "二楼靠窗座位", user1),
+                      Item.ItemCategory.STUDENT_ID, Item.PostType.LOST, "第一食堂", "二楼靠窗座位", user1),
             
             createItem("丢失黑色背包", "在体育场锻炼时丢失了黑色双肩包，里面有钱包、钥匙等重要物品。背包上有小黄人挂饰。", 
-                      Item.ItemCategory.ACCESSORY, Item.PostType.LOST, "体育场", "篮球场附近", user2),
+                      Item.ItemCategory.BACKPACK, Item.PostType.LOST, "体育场", "篮球场附近", user2),
             
             // 拾获
             createItem("拾到笔记本电脑", "在教室捡到一台ThinkPad笔记本电脑，黑色，屏幕14寸。请失主联系我并提供购买凭证。", 
-                      Item.ItemCategory.ELECTRONICS, Item.PostType.FOUND, "教学楼A101", "第一排座位", user2),
+                      Item.ItemCategory.LAPTOP, Item.PostType.FOUND, "教学楼A101", "第一排座位", user2),
             
             createItem("拾到钱包", "在校园小路上拾到一个棕色钱包，内有身份证、银行卡等。请失主尽快联系我认领。", 
-                      Item.ItemCategory.ACCESSORY, Item.PostType.FOUND, "校园小径", "樱花大道附近", user3),
+                      Item.ItemCategory.WALLET, Item.PostType.FOUND, "校园小径", "樱花大道附近", user3),
             
             createItem("拾到课本", "在图书馆拾到一本《高等数学》课本，扉页有姓名。请失主联系我取回。", 
-                      Item.ItemCategory.BOOKS, Item.PostType.FOUND, "图书馆", "二楼阅览室", user3),
+                      Item.ItemCategory.TEXTBOOK, Item.PostType.FOUND, "图书馆", "二楼阅览室", user3),
             
             createItem("拾到校园卡", "在食堂拾到一张校园卡，姓名李四。请失主联系我认领。", 
-                      Item.ItemCategory.DOCUMENTS, Item.PostType.FOUND, "第二食堂", "一楼收银台附近", user1),
+                      Item.ItemCategory.CAMPUS_CARD, Item.PostType.FOUND, "第二食堂", "一楼收银台附近", user1),
             
             createItem("丢失耳机", "在宿舍楼下丢失了AirPods Pro，白色充电盒。耳机对我来说很重要，请拾到者联系我。", 
-                      Item.ItemCategory.ELECTRONICS, Item.PostType.LOST, "宿舍楼下", "快递柜附近", user2)
+                      Item.ItemCategory.HEADPHONES, Item.PostType.LOST, "宿舍楼下", "快递柜附近", user2)
         );
         
         for (Item item : testItems) {

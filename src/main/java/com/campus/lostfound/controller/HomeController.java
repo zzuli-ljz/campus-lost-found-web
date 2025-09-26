@@ -97,6 +97,7 @@ public class HomeController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("postType", postType);
         model.addAttribute("category", category);
+        model.addAttribute("categories", Item.ItemCategory.values());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", items.getTotalPages());
         

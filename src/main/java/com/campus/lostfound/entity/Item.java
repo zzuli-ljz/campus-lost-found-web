@@ -90,13 +90,73 @@ public class Item extends BaseEntity {
     
     // 枚举定义
     public enum ItemCategory {
-        DOCUMENTS("证件类"),
-        ELECTRONICS("电子设备"),
-        STATIONERY("文具用品"),
-        CLOTHING("服饰"),
-        ACCESSORY("配件饰品"),
-        BOOKS("图书资料"),
-        SPORTS("运动用品"),
+        // 证件类
+        STUDENT_ID("学生证"),
+        ID_CARD("身份证"),
+        BANK_CARD("银行卡"),
+        CAMPUS_CARD("校园卡"),
+        DRIVER_LICENSE("驾驶证"),
+        
+        // 电子设备类
+        MOBILE_PHONE("手机"),
+        LAPTOP("笔记本电脑"),
+        TABLET("平板电脑"),
+        HEADPHONES("耳机"),
+        POWER_BANK("充电宝"),
+        CHARGER("充电器"),
+        USB_DRIVE("U盘"),
+        CAMERA("相机"),
+        SMARTWATCH("智能手表"),
+        
+        // 学习用品类
+        TEXTBOOK("教科书"),
+        NOTEBOOK("笔记本"),
+        PEN("笔"),
+        PENCIL("铅笔"),
+        ERASER("橡皮"),
+        RULER("尺子"),
+        CALCULATOR("计算器"),
+        FOLDER("文件夹"),
+        BACKPACK("书包"),
+        
+        // 服饰类
+        JACKET("外套"),
+        SWEATER("毛衣"),
+        T_SHIRT("T恤"),
+        PANTS("裤子"),
+        SHOES("鞋子"),
+        HAT("帽子"),
+        SCARF("围巾"),
+        GLOVES("手套"),
+        
+        // 配饰类
+        GLASSES("眼镜"),
+        SUNGLASSES("太阳镜"),
+        WATCH("手表"),
+        NECKLACE("项链"),
+        BRACELET("手镯"),
+        RING("戒指"),
+        EARRINGS("耳环"),
+        
+        // 生活用品类
+        WATER_BOTTLE("水杯"),
+        UMBRELLA("雨伞"),
+        WALLET("钱包"),
+        KEY("钥匙"),
+        KEYCHAIN("钥匙扣"),
+        COSMETICS("化妆品"),
+        MEDICINE("药品"),
+        
+        // 运动用品类
+        BASKETBALL("篮球"),
+        FOOTBALL("足球"),
+        BADMINTON_RACKET("羽毛球拍"),
+        TABLE_TENNIS_PADDLE("乒乓球拍"),
+        SPORTS_SHOES("运动鞋"),
+        SPORTS_CLOTHES("运动服"),
+        YOGA_MAT("瑜伽垫"),
+        
+        // 其他
         OTHER("其他");
         
         private final String description;
@@ -200,22 +260,90 @@ public class Item extends BaseEntity {
      */
     private int getCategoryWeight(ItemCategory category) {
         switch (category) {
-            case DOCUMENTS:
-                return 20; // 证件类权重最高
-            case ELECTRONICS:
-                return 15; // 电子设备权重较高
-            case BOOKS:
-                return 12; // 图书资料权重较高
-            case STATIONERY:
-                return 8;  // 文具用品权重中等
-            case CLOTHING:
-                return 6;   // 服饰权重较低
-            case ACCESSORY:
-                return 5;   // 配件饰品权重较低
-            case SPORTS:
-                return 4;   // 运动用品权重较低
+            // 证件类 - 权重最高
+            case STUDENT_ID:
+            case ID_CARD:
+            case CAMPUS_CARD:
+            case DRIVER_LICENSE:
+                return 20;
+            case BANK_CARD:
+                return 18;
+                
+            // 电子设备类 - 权重较高
+            case MOBILE_PHONE:
+            case LAPTOP:
+            case TABLET:
+                return 15;
+            case HEADPHONES:
+            case POWER_BANK:
+            case CHARGER:
+            case CAMERA:
+            case SMARTWATCH:
+                return 12;
+            case USB_DRIVE:
+                return 10;
+                
+            // 学习用品类 - 权重中等偏高
+            case TEXTBOOK:
+            case CALCULATOR:
+                return 12;
+            case NOTEBOOK:
+            case BACKPACK:
+                return 10;
+            case PEN:
+            case PENCIL:
+            case ERASER:
+            case RULER:
+            case FOLDER:
+                return 8;
+                
+            // 服饰类 - 权重中等
+            case JACKET:
+            case SWEATER:
+            case SHOES:
+                return 8;
+            case T_SHIRT:
+            case PANTS:
+            case HAT:
+            case SCARF:
+            case GLOVES:
+                return 6;
+                
+            // 配饰类 - 权重中等偏低
+            case GLASSES:
+            case WATCH:
+                return 8;
+            case SUNGLASSES:
+            case NECKLACE:
+            case BRACELET:
+            case RING:
+            case EARRINGS:
+                return 5;
+                
+            // 生活用品类 - 权重中等偏低
+            case WALLET:
+            case KEY:
+                return 10;
+            case WATER_BOTTLE:
+            case UMBRELLA:
+            case KEYCHAIN:
+            case COSMETICS:
+            case MEDICINE:
+                return 6;
+                
+            // 运动用品类 - 权重较低
+            case BASKETBALL:
+            case FOOTBALL:
+            case BADMINTON_RACKET:
+            case TABLE_TENNIS_PADDLE:
+            case SPORTS_SHOES:
+            case SPORTS_CLOTHES:
+            case YOGA_MAT:
+                return 4;
+                
+            // 其他 - 权重最低
             case OTHER:
-                return 2;   // 其他权重最低
+                return 2;
             default:
                 return 1;
         }

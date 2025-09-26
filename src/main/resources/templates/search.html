@@ -14,9 +14,10 @@
     <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow-lg">
         <div class="container">
-            <a class="navbar-brand fw-bold" th:href="@{/}">
-                <i class="bi bi-search-heart me-2"></i>
-                校园失物招领
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <img src="https://www.zzuli.edu.cn/_upload/tpl/0a/22/2594/template2594/images/logo.png" 
+                     alt="郑州轻工业大学" height="30" class="me-2">
+                <span class="fw-bold">校园失物招领</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -102,13 +103,9 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">类别</label>
-                                    <select class="form-select" name="category">
-                                        <option value="">所有类别</option>
-                                        <option th:each="cat : ${T(com.campus.lostfound.entity.Item.ItemCategory).values()}"
-                                                th:value="${cat}" 
-                                                th:text="${cat.description}"
-                                                th:selected="${category == cat}">
-                                        </option>
+                                    <select name="category" class="form-select">
+                                        <option value="ALL" th:selected="${selectedCategory == 'ALL'}">全部分类</option>
+                                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c.description}" th:selected="${selectedCategory == c.name()}">分类</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
