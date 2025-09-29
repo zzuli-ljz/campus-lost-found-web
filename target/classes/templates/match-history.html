@@ -104,7 +104,7 @@
 
                     <!-- 匹配记录列表 -->
                     <div class="row" th:if="${matches != null and !matches.empty}">
-                        <div class="col-12" th:each="match : ${matches.content}">
+                        <div class="col-12" th:each="match : ${matches}">
                             <div class="card mb-3 border-0 shadow-sm">
                                 <div class="card-body">
                                     <div class="row align-items-center">

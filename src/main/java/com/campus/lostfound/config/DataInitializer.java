@@ -184,7 +184,14 @@ public class DataInitializer implements CommandLineRunner {
                       Item.ItemCategory.CAMPUS_CARD, Item.PostType.FOUND, "第二食堂", "一楼收银台附近", user1),
             
             createItem("丢失耳机", "在宿舍楼下丢失了AirPods Pro，白色充电盒。耳机对我来说很重要，请拾到者联系我。", 
-                      Item.ItemCategory.HEADPHONES, Item.PostType.LOST, "宿舍楼下", "快递柜附近", user2)
+                      Item.ItemCategory.HEADPHONES, Item.PostType.LOST, "宿舍楼下", "快递柜附近", user2),
+            
+            // 添加充电器测试数据 - 失物和拾物
+            createItem("丢失充电器", "在图书馆丢失了iPhone充电器，白色数据线，苹果原装。请拾到者联系我。", 
+                      Item.ItemCategory.CHARGER, Item.PostType.LOST, "图书馆", "三楼自习区", user1),
+            
+            createItem("拾到充电器", "在图书馆拾到一个iPhone充电器，白色数据线，看起来是原装的。请失主联系我认领。", 
+                      Item.ItemCategory.CHARGER, Item.PostType.FOUND, "图书馆", "三楼自习区", user2)
         );
         
         for (Item item : testItems) {

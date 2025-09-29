@@ -93,7 +93,7 @@ public class ItemService {
      * 获取已审核的物品
      */
     public Page<Item> getApprovedItems(Pageable pageable) {
-        return itemRepository.findByApprovedTrue(pageable);
+        return itemRepository.findByApprovedTrueAndStatusNot(Item.ItemStatus.COMPLETED, pageable);
     }
     
     /**
@@ -494,26 +494,68 @@ public class ItemService {
         List<Item> candidates = itemRepository.findCandidateItemsSince(oppositeType, since);
         List<com.campus.lostfound.service.dto.MatchCandidate> scored = new ArrayList<>();
 
+        // 首先添加已经通过MatchingService创建的匹配记录
+        List<ItemMatch> existingMatches = matchingService.getMatchesForItem(item);
+        for (ItemMatch match : existingMatches) {
+            if (match.getStatus() != ItemMatch.MatchStatus.ACTIVE) continue;
+            
+            Item matchedItem = (item.getPostType() == Item.PostType.LOST) ? 
+                match.getFoundItem() : match.getLostItem();
+            
+            if (matchedItem != null && matchedItem.isApproved() && matchedItem.isActive()) {
+                List<String> reasons = new ArrayList<>();
+                reasons.add("系统自动匹配");
+                reasons.add("类别相同");
+                
+                // 添加匹配原因
+                if (item.getLocation() != null && item.getLocation().equals(matchedItem.getLocation())) {
+                    reasons.add("地点相同");
+                }
+                if (item.getDetailedLocation() != null && item.getDetailedLocation().equals(matchedItem.getDetailedLocation())) {
+                    reasons.add("详细地点相同");
+                }
+                
+                scored.add(new com.campus.lostfound.service.dto.MatchCandidate(
+                    matchedItem, round2(match.getMatchWeight()), reasons));
+            }
+        }
+
+        // 然后添加其他候选项
         for (Item candidate : candidates) {
             if (candidate.getId().equals(item.getId())) continue;
             if (!candidate.isApproved()) continue;
             if (!candidate.isActive()) continue;
-            if (itemMatchRepository.existsMatchBetweenItems(item, candidate)) continue;
+            if (candidate.getStatus() == Item.ItemStatus.COMPLETED) continue; // 过滤掉已完成的候选物品
+            
+            // 检查是否已经在现有匹配中
+            boolean alreadyMatched = false;
+            for (ItemMatch match : existingMatches) {
+                Item matchedItem = (item.getPostType() == Item.PostType.LOST) ? 
+                    match.getFoundItem() : match.getLostItem();
+                if (matchedItem != null && matchedItem.getId().equals(candidate.getId())) {
+                    alreadyMatched = true;
+                    break;
+                }
+            }
+            if (alreadyMatched) continue;
 
             double score = 0.0;
             List<String> reasons = new ArrayList<>();
 
-            // 位置主类相同占 0.35
+            // 类别必须相同，否则直接跳过
+            if (item.getCategory() == null || !item.getCategory().equals(candidate.getCategory())) {
+                continue; // 类别不同，跳过此候选项
+            }
+            score += 0.30; // 类别相同基础分
+            reasons.add("类别相同");
+
+            // 位置主类相同占 0.25
             if (item.getLocation() != null && item.getLocation().equals(candidate.getLocation())) {
-                score += 0.35; reasons.add("地点相同");
+                score += 0.25; reasons.add("地点相同");
             }
             // 详细地点相同占 0.20
             if (item.getDetailedLocation() != null && item.getDetailedLocation().equals(candidate.getDetailedLocation())) {
                 score += 0.20; reasons.add("详细地点相同");
-            }
-            // 类别相同占 0.20
-            if (item.getCategory() != null && item.getCategory().equals(candidate.getCategory())) {
-                score += 0.20; reasons.add("类别相同");
             }
             // 时间接近（丢失/拾获时间差 <= 3 天 -> 0.15；<= 7 天 -> 0.08）
             if (item.getLostFoundTime() != null && candidate.getLostFoundTime() != null) {
@@ -528,7 +570,8 @@ public class ItemService {
             if (textScore >= 0.5) reasons.add("文本高度相似");
             else if (textScore >= 0.25) reasons.add("文本有一定相似");
 
-            if (score >= 0.40) { // 建议阈值，低于则不展示
+            // 类别相同的情况下，降低阈值要求
+            if (score >= 0.30) { // 类别相同基础分即可通过
                 scored.add(new com.campus.lostfound.service.dto.MatchCandidate(candidate, round2(score), reasons));
             }
         }
@@ -547,6 +590,7 @@ public class ItemService {
         List<com.campus.lostfound.service.dto.UserItemCandidates> result = new ArrayList<>();
         for (Item item : myItems) {
             if (!item.isApproved()) continue; // 只有已审核的物品参与匹配
+            if (item.getStatus() == Item.ItemStatus.COMPLETED) continue; // 过滤掉已完成的物品
             List<com.campus.lostfound.service.dto.MatchCandidate> list = suggestMatchesForItem(item, daysWindow, limitPerItem);
             result.add(new com.campus.lostfound.service.dto.UserItemCandidates(item, list));
         }

@@ -47,6 +47,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     /**
      * 查找已审核的物品
      */
+    Page<Item> findByApprovedTrueAndStatusNot(Item.ItemStatus status, Pageable pageable);
+    
+    /**
+     * 查找已审核的物品（保留原方法用于管理员查看）
+     */
     Page<Item> findByApprovedTrue(Pageable pageable);
     
     /**
@@ -68,7 +73,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * 搜索物品（按标题和描述）
      */
     @Query("SELECT i FROM Item i WHERE " +
-           "i.approved = true AND (" +
+           "i.approved = true AND i.status != 'COMPLETED' AND (" +
            "LOWER(i.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(i.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(i.location) LIKE LOWER(CONCAT('%', :keyword, '%')))")
@@ -78,7 +83,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
      * 高级搜索物品
      */
     @Query("SELECT i FROM Item i WHERE " +
-           "i.approved = true AND " +
+           "i.approved = true AND i.status != 'COMPLETED' AND " +
            "(:postType IS NULL OR i.postType = :postType) AND " +
            "(:category IS NULL OR i.category = :category) AND " +
            "(:keyword IS NULL OR LOWER(i.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -91,13 +96,13 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     /**
      * 查找最近的物品
      */
-    @Query("SELECT i FROM Item i WHERE i.approved = true ORDER BY i.createdAt DESC")
+    @Query("SELECT i FROM Item i WHERE i.approved = true AND i.status != 'COMPLETED' ORDER BY i.createdAt DESC")
     Page<Item> findRecentItems(Pageable pageable);
     
     /**
      * 查找热门物品（按认领数量）
      */
-    @Query("SELECT i FROM Item i WHERE i.approved = true AND i.postType = 'FOUND' " +
+    @Query("SELECT i FROM Item i WHERE i.approved = true AND i.status != 'COMPLETED' AND i.postType = 'FOUND' " +
            "ORDER BY SIZE(i.claims) DESC")
     Page<Item> findPopularItems(Pageable pageable);
     

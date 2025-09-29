@@ -165,14 +165,63 @@ public class ItemController {
      * 我的物品页面
      */
     @GetMapping("/my-items")
-    public String myItems(@AuthenticationPrincipal User user, Model model) {
+    public String myItems(@AuthenticationPrincipal User user, 
+                         @RequestParam(defaultValue = "active") String tab,
+                         Model model) {
         if (user == null) {
             return "redirect:/login";
         }
         
-        List<Item> items = itemService.getUserItems(user);
+        List<Item> allItems = itemService.getUserItems(user);
+        
+        // 分离已完成和未完成物品
+        List<Item> activeItems = allItems.stream()
+                .filter(item -> item.getStatus() != Item.ItemStatus.COMPLETED)
+                .collect(java.util.stream.Collectors.toList());
+        
+        List<Item> completedItems = allItems.stream()
+                .filter(item -> item.getStatus() == Item.ItemStatus.COMPLETED)
+                .collect(java.util.stream.Collectors.toList());
+        
+        // 进一步按失物/拾获分类
+        List<Item> activeLostItems = activeItems.stream()
+                .filter(item -> item.getPostType() == Item.PostType.LOST)
+                .collect(java.util.stream.Collectors.toList());
+        
+        List<Item> activeFoundItems = activeItems.stream()
+                .filter(item -> item.getPostType() == Item.PostType.FOUND)
+                .collect(java.util.stream.Collectors.toList());
+        
+        List<Item> completedLostItems = completedItems.stream()
+                .filter(item -> item.getPostType() == Item.PostType.LOST)
+                .collect(java.util.stream.Collectors.toList());
+        
+        List<Item> completedFoundItems = completedItems.stream()
+                .filter(item -> item.getPostType() == Item.PostType.FOUND)
+                .collect(java.util.stream.Collectors.toList());
+        
+        // 获取用户成功认领的物品（认领状态为COMPLETED的物品）
+        List<Item> claimedItems = new ArrayList<>();
+        try {
+            List<com.campus.lostfound.entity.Claim> userClaims = claimRepository.findByClaimantOrderByCreatedAtDesc(user);
+            claimedItems = userClaims.stream()
+                    .filter(claim -> claim.getStatus() == com.campus.lostfound.entity.Claim.ClaimStatus.COMPLETED)
+                    .map(com.campus.lostfound.entity.Claim::getItem)
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+        } catch (Exception e) {
+            log.error("获取用户认领物品失败: {}", e.getMessage(), e);
+        }
+        
         model.addAttribute("user", user);
-        model.addAttribute("items", items);
+        model.addAttribute("activeItems", activeItems);
+        model.addAttribute("completedItems", completedItems);
+        model.addAttribute("activeLostItems", activeLostItems);
+        model.addAttribute("activeFoundItems", activeFoundItems);
+        model.addAttribute("completedLostItems", completedLostItems);
+        model.addAttribute("completedFoundItems", completedFoundItems);
+        model.addAttribute("claimedItems", claimedItems);
+        model.addAttribute("currentTab", tab);
         
         return "my-items";
     }

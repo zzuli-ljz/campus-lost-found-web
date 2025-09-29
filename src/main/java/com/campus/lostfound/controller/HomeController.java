@@ -79,29 +79,37 @@ public class HomeController {
                         @AuthenticationPrincipal User user,
                         Model model) {
         
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Item> items;
-        
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            if (postType != null || category != null) {
-                items = itemService.advancedSearch(keyword.trim(), postType, category, pageable);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Item> items;
+            
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                if (postType != null || category != null) {
+                    items = itemService.advancedSearch(keyword.trim(), postType, category, pageable);
+                } else {
+                    items = itemService.searchItems(keyword.trim(), pageable);
+                }
             } else {
-                items = itemService.searchItems(keyword.trim(), pageable);
+                items = itemService.getApprovedItems(pageable);
             }
-        } else {
-            items = itemService.getApprovedItems(pageable);
+            
+            model.addAttribute("user", user);
+            model.addAttribute("items", items);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("postType", postType);
+            model.addAttribute("category", category);
+            model.addAttribute("categories", Item.ItemCategory.values());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", items.getTotalPages());
+            
+            return "search";
+        } catch (Exception e) {
+            log.error("搜索功能出现错误: {}", e.getMessage(), e);
+            model.addAttribute("error", "搜索功能暂时不可用，请稍后再试");
+            model.addAttribute("user", user);
+            model.addAttribute("categories", Item.ItemCategory.values());
+            return "search";
         }
-        
-        model.addAttribute("user", user);
-        model.addAttribute("items", items);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("postType", postType);
-        model.addAttribute("category", category);
-        model.addAttribute("categories", Item.ItemCategory.values());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", items.getTotalPages());
-        
-        return "search";
     }
     
     /**
